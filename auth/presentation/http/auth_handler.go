@@ -8,13 +8,13 @@ import (
 	"github.com/skeey/e-commerce-go-clean-arch/domain"
 )
 
-type authHandler struct {
+type AuthHandler struct {
 	AuthUseCase   domain.AuthUseCase
 	AuthValidator domain.AuthValidator
 }
 
-func NewAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator) {
-	handler := &authHandler{
+func InitAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator) {
+	handler := &AuthHandler{
 		AuthUseCase:   auc,
 		AuthValidator: av,
 	}
@@ -24,10 +24,10 @@ func NewAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidato
 	// e.POST("/forgotpass", handler.ForgotPassword)
 }
 
-func (ah *authHandler) Login(c echo.Context) error {
-	var auth *domain.Auth
+func (ah *AuthHandler) Login(c echo.Context) error {
+	var auth domain.Auth
 
-	err := c.Bind(auth)
+	err := c.Bind(&auth)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "falha ao tentar interpretar as informações enviadas")
@@ -35,7 +35,7 @@ func (ah *authHandler) Login(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	isValid, message, errValid := ah.AuthValidator.Validate(ctx, auth)
+	isValid, message, errValid := ah.AuthValidator.Validate(ctx, &auth)
 
 	if errValid != nil {
 		log.Printf("Error validating Auth: %s", errValid.Error())
@@ -46,7 +46,7 @@ func (ah *authHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, message)
 	}
 
-	token, errToken := ah.AuthUseCase.Login(ctx, auth)
+	token, errToken := ah.AuthUseCase.Login(ctx, &auth)
 
 	if errToken != nil {
 		log.Printf("Error trying to generate token for Login: %s", errToken.Error())
@@ -56,10 +56,10 @@ func (ah *authHandler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"token": string(token)})
 }
 
-// func (ah *authHandler) SignUp(c echo.Context) error {
+// func (ah *AuthHandler) SignUp(c echo.Context) error {
 
 // }
 
-// func (ah *authHandler) ForgotPassword(c echo.Context) error {
+// func (ah *AuthHandler) ForgotPassword(c echo.Context) error {
 
 // }

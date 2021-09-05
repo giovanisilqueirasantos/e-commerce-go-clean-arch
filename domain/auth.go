@@ -8,17 +8,12 @@ type Auth struct {
 	ConfirmPassword string `json:"confirmPassword"`
 }
 
-type token string
-type ok bool
-type isValid bool
-type message string
-
 type AuthUseCase interface {
-	Login(ctx context.Context, a *Auth) (token, error)
-	SignUp(ctx context.Context, a *Auth, u *User) (ok, error)
-	ForgotPassword(ctx context.Context, a *Auth) (ok, error)
+	Login(ctx context.Context, a *Auth) (Token, error)
+	SignUp(ctx context.Context, a *Auth, u *User) (OK, error)
+	ForgotPassword(ctx context.Context, a *Auth) (OK, error)
 }
 
 type AuthValidator interface {
-	Validate(ctx context.Context, a *Auth) (isValid, message, error)
+	Validate(ctx context.Context, a *Auth) (IsValid, Message, error)
 }
