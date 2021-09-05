@@ -30,7 +30,7 @@ func (ah *AuthHandler) Login(c echo.Context) error {
 	err := c.Bind(&auth)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "falha ao tentar interpretar as informações enviadas")
+		return c.JSON(http.StatusBadRequest, "failed to interpret the submitted information")
 	}
 
 	ctx := c.Request().Context()
@@ -39,7 +39,7 @@ func (ah *AuthHandler) Login(c echo.Context) error {
 
 	if errValid != nil {
 		log.Printf("Error validating Auth: %s", errValid.Error())
-		return c.JSON(http.StatusInternalServerError, "falha ao tentar realizar o login")
+		return c.JSON(http.StatusInternalServerError, "failed to login")
 	}
 
 	if !isValid {
@@ -50,7 +50,7 @@ func (ah *AuthHandler) Login(c echo.Context) error {
 
 	if errToken != nil {
 		log.Printf("Error trying to generate token for Login: %s", errToken.Error())
-		return c.JSON(http.StatusInternalServerError, "falha ao tentar realizar o login")
+		return c.JSON(http.StatusInternalServerError, "failed to login")
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"token": string(token)})
