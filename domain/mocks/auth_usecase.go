@@ -16,12 +16,12 @@ func (m *MockAuthUsecase) Login(ctx context.Context, a *domain.Auth) (domain.Tok
 	return domain.Token(args.String(0)), args.Error(1)
 }
 
-func (m *MockAuthUsecase) SignUp(ctx context.Context, a *domain.Auth, u *domain.User) (domain.OK, error) {
+func (m *MockAuthUsecase) SignUp(ctx context.Context, a *domain.Auth, u *domain.User) error {
 	args := m.Called(ctx, a, u)
-	return domain.OK(args.Bool(0)), args.Error(1)
+	return args.Error(0)
 }
 
-func (m *MockAuthUsecase) ForgotPassword(ctx context.Context, a *domain.Auth) (domain.OK, error) {
+func (m *MockAuthUsecase) ForgotPassword(ctx context.Context, a *domain.Auth) error {
 	args := m.Called(ctx, a)
-	return domain.OK(args.Bool(0)), args.Error(1)
+	return args.Error(0)
 }

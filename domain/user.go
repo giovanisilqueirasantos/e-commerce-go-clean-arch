@@ -6,11 +6,15 @@ type User struct {
 	Email       string `json:"email"`
 	FirstName   string `json:"firstName"`
 	LastName    string `json:"lastName"`
-	PhoneNumber string `json:"phoneName"`
-	Address     string `json:"addressName"`
+	PhoneNumber string `json:"phoneNumber"`
+	Address     string `json:"address"`
 }
 
 type UserRepository interface {
 	GetByID(ctx context.Context, id int64) (User, error)
 	Update(ctx context.Context, u *User) error
+}
+
+type UserValidator interface {
+	Validate(ctx context.Context, u *User) (IsValid, Message, error)
 }
