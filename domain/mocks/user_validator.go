@@ -3,7 +3,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/skeey/e-commerce-go-clean-arch/domain"
+	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/domain"
 	"github.com/stretchr/testify/mock"
 )
 
