@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/domain"
+	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/domain/mocks"
 	"github.com/labstack/echo/v4"
-	"github.com/skeey/e-commerce-go-clean-arch/domain"
-	"github.com/skeey/e-commerce-go-clean-arch/domain/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

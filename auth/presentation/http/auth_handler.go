@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/skeey/e-commerce-go-clean-arch/domain"
+	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/domain"
 )
 
 type AuthHandler struct {
