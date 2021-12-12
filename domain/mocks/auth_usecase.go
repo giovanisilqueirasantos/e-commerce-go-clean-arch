@@ -21,7 +21,7 @@ func (m *MockAuthUsecase) SignUp(ctx context.Context, a *domain.Auth, u *domain.
 	return args.Error(0)
 }
 
-func (m *MockAuthUsecase) ForgotPassword(ctx context.Context, a *domain.Auth) error {
-	args := m.Called(ctx, a)
+func (m *MockAuthUsecase) ForgotPasswordCode(ctx context.Context, login string) error {
+	args := m.Called(ctx, login)
 	return args.Error(0)
 }

@@ -11,9 +11,10 @@ type Auth struct {
 type AuthUseCase interface {
 	Login(ctx context.Context, a *Auth) (Token, error)
 	SignUp(ctx context.Context, a *Auth, u *User) error
-	ForgotPassword(ctx context.Context, a *Auth) error
+	ForgotPasswordCode(ctx context.Context, login string) error
 }
 
 type AuthValidator interface {
 	Validate(ctx context.Context, a *Auth) (IsValid, Message, error)
+	ValidateLogin(ctx context.Context, login string) (IsValid, Message, error)
 }

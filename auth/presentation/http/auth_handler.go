@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
 	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/domain"
+	"github.com/labstack/echo/v4"
 )
 
 type AuthHandler struct {
@@ -23,7 +23,7 @@ func InitAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidat
 
 	e.POST("/login", handler.Login)
 	e.POST("/signup", handler.SignUp)
-	// e.POST("/forgotpass", handler.ForgotPassword)
+	e.POST("/forgotpass/code", handler.ForgotPasswordCode)
 }
 
 func (ah *AuthHandler) Login(c echo.Context) error {
@@ -118,6 +118,36 @@ func (ah *AuthHandler) SignUp(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 
-// func (ah *AuthHandler) ForgotPassword(c echo.Context) error {
+func (ah *AuthHandler) ForgotPasswordCode(c echo.Context) error {
+	var forgotPassReq struct {
+		Login string `json:"login"`
+	}
 
-// }
+	err := c.Bind(&forgotPassReq)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "failed to interpret the submitted information")
+	}
+
+	ctx := c.Request().Context()
+
+	isValidLogin, messageLogin, errValidLogin := ah.AuthValidator.ValidateLogin(ctx, forgotPassReq.Login)
+
+	if errValidLogin != nil {
+		log.Printf("Error validating login: %s", errValidLogin.Error())
+		return c.JSON(http.StatusInternalServerError, "failed to send forgot password code")
+	}
+
+	if !isValidLogin {
+		return c.JSON(http.StatusBadRequest, messageLogin)
+	}
+
+	err = ah.AuthUseCase.ForgotPasswordCode(ctx, forgotPassReq.Login)
+
+	if err != nil {
+		log.Printf("Error trying to send forgot password code: %s", err.Error())
+		return c.JSON(http.StatusInternalServerError, "failed to send forgot password code")
+	}
+
+	return c.String(http.StatusOK, "")
+}

@@ -396,3 +396,102 @@ func TestSignUpSuccess(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 }
+
+func TestForgotPasswordCodeWrongBody(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(echo.POST, "/forgotpass/code", strings.NewReader("invalidbody"))
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	handler := AuthHandler{}
+
+	handler.ForgotPasswordCode(c)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.NotEqual(t, "", rec.Body.String())
+}
+
+func TestForgotPasswordCodeErrorInvalidLogin(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(
+		echo.POST, "/forgotpass/code",
+		strings.NewReader("{\"login\":\"invalid login\""),
+	)
+	req.Header.Add("content-type", "application/json")
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	mockAuthValidator := new(mocks.MockAuthValidator)
+
+	mockAuthValidator.On("ValidateLogin", mock.Anything, "invalid login").Return(false, "error message", errors.New("error message"))
+
+	handler := AuthHandler{
+		AuthValidator: mockAuthValidator,
+	}
+
+	handler.ForgotPasswordCode(c)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.NotEqual(t, "", rec.Body.String())
+}
+
+func TestForgotPasswordCodeErrorSendingCode(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(
+		echo.POST, "/forgotpass/code",
+		strings.NewReader("{\"login\":\"valid login\"}"),
+	)
+	req.Header.Add("content-type", "application/json")
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	mockAuthUsecase := new(mocks.MockAuthUsecase)
+	mockAuthValidator := new(mocks.MockAuthValidator)
+
+	mockAuthUsecase.On("ForgotPasswordCode", mock.Anything, "valid login").Return(errors.New("error message"))
+	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "", nil)
+
+	handler := AuthHandler{
+		AuthUseCase:   mockAuthUsecase,
+		AuthValidator: mockAuthValidator,
+	}
+
+	handler.ForgotPasswordCode(c)
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	assert.NotEqual(t, "", rec.Body.String())
+}
+
+func TestForgotPasswordCodeSuccess(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(
+		echo.POST, "/forgotpass/code",
+		strings.NewReader("{\"login\":\"valid login\"}"),
+	)
+	req.Header.Add("content-type", "application/json")
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	mockAuthUsecase := new(mocks.MockAuthUsecase)
+	mockAuthValidator := new(mocks.MockAuthValidator)
+
+	mockAuthUsecase.On("ForgotPasswordCode", mock.Anything, "valid login").Return(nil)
+	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "", nil)
+
+	handler := AuthHandler{
+		AuthUseCase:   mockAuthUsecase,
+		AuthValidator: mockAuthValidator,
+	}
+
+	handler.ForgotPasswordCode(c)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+}
