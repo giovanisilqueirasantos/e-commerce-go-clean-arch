@@ -246,7 +246,6 @@ func TestSignUpErrorValidatingUser(t *testing.T) {
 	var mockAuth domain.Auth
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "valid password"
-	mockAuth.ConfirmPassword = "valid confirm password"
 
 	var mockUser domain.User
 	mockUser.Email = "invalidemail@email.com"
@@ -287,7 +286,6 @@ func TestSignUpUserInvalid(t *testing.T) {
 	var mockAuth domain.Auth
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "valid password"
-	mockAuth.ConfirmPassword = "valid confirm password"
 
 	var mockUser domain.User
 	mockUser.Email = "invalidemail@email.com"
@@ -329,7 +327,6 @@ func TestSignUpErrorOnSignUp(t *testing.T) {
 	var mockAuth domain.Auth
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "valid password"
-	mockAuth.ConfirmPassword = "valid confirm password"
 
 	var mockUser domain.User
 	mockUser.Email = "validemail@email.com"
@@ -373,7 +370,6 @@ func TestSignUpSuccess(t *testing.T) {
 	var mockAuth domain.Auth
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "valid password"
-	mockAuth.ConfirmPassword = "valid confirm password"
 
 	var mockUser domain.User
 	mockUser.Email = "validemail@email.com"
@@ -397,7 +393,7 @@ func TestSignUpSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 }
 
-func TestForgotPasswordCodeWrongBody(t *testing.T) {
+func TestForgotPassCodeWrongBody(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(echo.POST, "/forgotpass/code", strings.NewReader("invalidbody"))
 	assert.NoError(t, err)
@@ -407,13 +403,13 @@ func TestForgotPasswordCodeWrongBody(t *testing.T) {
 
 	handler := AuthHandler{}
 
-	handler.ForgotPasswordCode(c)
+	handler.ForgotPassCode(c)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.NotEqual(t, "", rec.Body.String())
 }
 
-func TestForgotPasswordCodeErrorInvalidLogin(t *testing.T) {
+func TestForgotPassCodeErrorInvalidLogin(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
 		echo.POST, "/forgotpass/code",
@@ -433,13 +429,13 @@ func TestForgotPasswordCodeErrorInvalidLogin(t *testing.T) {
 		AuthValidator: mockAuthValidator,
 	}
 
-	handler.ForgotPasswordCode(c)
+	handler.ForgotPassCode(c)
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.NotEqual(t, "", rec.Body.String())
 }
 
-func TestForgotPasswordCodeErrorSendingCode(t *testing.T) {
+func TestForgotPassCodeErrorSendingCode(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
 		echo.POST, "/forgotpass/code",
@@ -454,7 +450,7 @@ func TestForgotPasswordCodeErrorSendingCode(t *testing.T) {
 	mockAuthUsecase := new(mocks.MockAuthUsecase)
 	mockAuthValidator := new(mocks.MockAuthValidator)
 
-	mockAuthUsecase.On("ForgotPasswordCode", mock.Anything, "valid login").Return(errors.New("error message"))
+	mockAuthUsecase.On("ForgotPassCode", mock.Anything, "valid login").Return(errors.New("error message"))
 	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "", nil)
 
 	handler := AuthHandler{
@@ -462,13 +458,13 @@ func TestForgotPasswordCodeErrorSendingCode(t *testing.T) {
 		AuthValidator: mockAuthValidator,
 	}
 
-	handler.ForgotPasswordCode(c)
+	handler.ForgotPassCode(c)
 
 	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	assert.NotEqual(t, "", rec.Body.String())
 }
 
-func TestForgotPasswordCodeSuccess(t *testing.T) {
+func TestForgotPassCodeSuccess(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
 		echo.POST, "/forgotpass/code",
@@ -483,7 +479,7 @@ func TestForgotPasswordCodeSuccess(t *testing.T) {
 	mockAuthUsecase := new(mocks.MockAuthUsecase)
 	mockAuthValidator := new(mocks.MockAuthValidator)
 
-	mockAuthUsecase.On("ForgotPasswordCode", mock.Anything, "valid login").Return(nil)
+	mockAuthUsecase.On("ForgotPassCode", mock.Anything, "valid login").Return(nil)
 	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "", nil)
 
 	handler := AuthHandler{
@@ -491,7 +487,145 @@ func TestForgotPasswordCodeSuccess(t *testing.T) {
 		AuthValidator: mockAuthValidator,
 	}
 
-	handler.ForgotPasswordCode(c)
+	handler.ForgotPassCode(c)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
+func TestForgotPassResetWrongBody(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(echo.POST, "/forgotpass/reset", strings.NewReader("invalidbody"))
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	handler := AuthHandler{}
+
+	handler.ForgotPassReset(c)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.NotEqual(t, "", rec.Body.String())
+}
+
+func TestForgotPassResetErrorValidatingForgotPassReset(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(
+		echo.POST, "/forgotpass/reset",
+		strings.NewReader("{\"code\":\"invalid code\",\"newPassword\":\"invalid new password\"}"),
+	)
+	req.Header.Add("content-type", "application/json")
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	mockForgotPassResetValidator := new(mocks.MockForgotPassResetValidator)
+	var mockForgotPassReset domain.ForgotPassReset
+	mockForgotPassReset.Code = "invalid code"
+	mockForgotPassReset.NewPassword = "invalid new password"
+
+	mockForgotPassResetValidator.On("Validate", mock.Anything, &mockForgotPassReset).Return(false, "error message", errors.New("error message"))
+
+	handler := AuthHandler{
+		ForgotPassResetValidator: mockForgotPassResetValidator,
+	}
+
+	handler.ForgotPassReset(c)
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	assert.NotEqual(t, "", rec.Body.String())
+}
+
+func TestForgotPassResetForgotPassResetInvalid(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(
+		echo.POST, "/forgotpass/reset",
+		strings.NewReader("{\"code\":\"invalid code\",\"newPassword\":\"invalid new password\"}"),
+	)
+	req.Header.Add("content-type", "application/json")
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	mockForgotPassResetValidator := new(mocks.MockForgotPassResetValidator)
+	var mockForgotPassReset domain.ForgotPassReset
+	mockForgotPassReset.Code = "invalid code"
+	mockForgotPassReset.NewPassword = "invalid new password"
+
+	mockForgotPassResetValidator.On("Validate", mock.Anything, &mockForgotPassReset).Return(false, "error message", nil)
+
+	handler := AuthHandler{
+		ForgotPassResetValidator: mockForgotPassResetValidator,
+	}
+
+	handler.ForgotPassReset(c)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	assert.NotEqual(t, "", rec.Body.String())
+}
+
+func TestForgotPassResetErrorResettingPassword(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(
+		echo.POST, "/forgotpass/reset",
+		strings.NewReader("{\"code\":\"valid code\",\"newPassword\":\"valid new password\"}"),
+	)
+	req.Header.Add("content-type", "application/json")
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	mockAuthUsecase := new(mocks.MockAuthUsecase)
+	mockForgotPassResetValidator := new(mocks.MockForgotPassResetValidator)
+	var mockForgotPassReset domain.ForgotPassReset
+	mockForgotPassReset.Code = "valid code"
+	mockForgotPassReset.NewPassword = "valid new password"
+
+	mockAuthUsecase.On("ForgotPassReset", mock.Anything, &mockForgotPassReset).Return("", errors.New("error message"))
+	mockForgotPassResetValidator.On("Validate", mock.Anything, &mockForgotPassReset).Return(true, "", nil)
+
+	handler := AuthHandler{
+		AuthUseCase:              mockAuthUsecase,
+		ForgotPassResetValidator: mockForgotPassResetValidator,
+	}
+
+	handler.ForgotPassReset(c)
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	assert.NotEqual(t, "", rec.Body.String())
+}
+
+func TestForgotPassResetSuccess(t *testing.T) {
+	e := echo.New()
+	req, err := http.NewRequest(
+		echo.POST, "/forgotpass/reset",
+		strings.NewReader("{\"code\":\"valid code\",\"newPassword\":\"valid new password\"}"),
+	)
+	req.Header.Add("content-type", "application/json")
+	assert.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	mockAuthUsecase := new(mocks.MockAuthUsecase)
+	mockForgotPassResetValidator := new(mocks.MockForgotPassResetValidator)
+	var mockForgotPassReset domain.ForgotPassReset
+	mockForgotPassReset.Code = "valid code"
+	mockForgotPassReset.NewPassword = "valid new password"
+
+	mockAuthUsecase.On("ForgotPassReset", mock.Anything, &mockForgotPassReset).Return("valid token", nil)
+	mockForgotPassResetValidator.On("Validate", mock.Anything, &mockForgotPassReset).Return(true, "", nil)
+
+	handler := AuthHandler{
+		AuthUseCase:              mockAuthUsecase,
+		ForgotPassResetValidator: mockForgotPassResetValidator,
+	}
+
+	handler.ForgotPassReset(c)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "{\"token\":\"valid token\"}\n", rec.Body.String())
 }

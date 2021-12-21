@@ -9,21 +9,24 @@ import (
 )
 
 type AuthHandler struct {
-	AuthUseCase   domain.AuthUseCase
-	AuthValidator domain.AuthValidator
-	UserValidator domain.UserValidator
+	AuthUseCase              domain.AuthUseCase
+	AuthValidator            domain.AuthValidator
+	UserValidator            domain.UserValidator
+    ForgotPassResetValidator domain.ForgotPassResetValidator
 }
 
-func InitAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator, uv domain.UserValidator) {
+func InitAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator, uv domain.UserValidator, fprv domain.ForgotPassResetValidator) {
 	handler := &AuthHandler{
-		AuthUseCase:   auc,
-		AuthValidator: av,
-		UserValidator: uv,
+		AuthUseCase:              auc,
+		AuthValidator:            av,
+		UserValidator:            uv,
+        ForgotPassResetValidator: fprv,
 	}
 
 	e.POST("/login", handler.Login)
 	e.POST("/signup", handler.SignUp)
-	e.POST("/forgotpass/code", handler.ForgotPasswordCode)
+	e.POST("/forgotpass/code", handler.ForgotPassCode)
+    e.POST("/forgotpass/reset", handler.ForgotPassReset)
 }
 
 func (ah *AuthHandler) Login(c echo.Context) error {
@@ -75,7 +78,6 @@ func (ah *AuthHandler) SignUp(c echo.Context) error {
 	auth := domain.Auth{
 		Login:           authWithUser.Login,
 		Password:        authWithUser.Password,
-		ConfirmPassword: authWithUser.ConfirmPassword,
 	}
 
 	isValidAuth, messageAuth, errValidAuth := ah.AuthValidator.Validate(ctx, &auth)
@@ -118,7 +120,7 @@ func (ah *AuthHandler) SignUp(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 
-func (ah *AuthHandler) ForgotPasswordCode(c echo.Context) error {
+func (ah *AuthHandler) ForgotPassCode(c echo.Context) error {
 	var forgotPassReq struct {
 		Login string `json:"login"`
 	}
@@ -142,7 +144,7 @@ func (ah *AuthHandler) ForgotPasswordCode(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, messageLogin)
 	}
 
-	err = ah.AuthUseCase.ForgotPasswordCode(ctx, forgotPassReq.Login)
+	err = ah.AuthUseCase.ForgotPassCode(ctx, forgotPassReq.Login)
 
 	if err != nil {
 		log.Printf("Error trying to send forgot password code: %s", err.Error())
@@ -150,4 +152,36 @@ func (ah *AuthHandler) ForgotPasswordCode(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "")
+}
+
+func (ah *AuthHandler) ForgotPassReset(c echo.Context) error {
+    var fpr domain.ForgotPassReset
+
+	err := c.Bind(&fpr)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, "failed to interpret the submitted information")
+	}
+
+	ctx := c.Request().Context()
+
+	isValidForgotPassReset, messageForgotPassReset, errValidForgotPassReset := ah.ForgotPassResetValidator.Validate(ctx, &fpr)
+
+	if errValidForgotPassReset != nil {
+		log.Printf("Error validating forgot password reset: %s", errValidForgotPassReset.Error())
+		return c.JSON(http.StatusInternalServerError, "failed to reset the password")
+	}
+
+	if !isValidForgotPassReset {
+		return c.JSON(http.StatusBadRequest, messageForgotPassReset)
+	}
+
+    token, errToken := ah.AuthUseCase.ForgotPassReset(ctx, &fpr)
+
+	if errToken != nil {
+		log.Printf("Error trying to reset user's password: %s", errToken.Error())
+		return c.JSON(http.StatusInternalServerError, "failed to reset the password")
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"token": string(token)})
 }
