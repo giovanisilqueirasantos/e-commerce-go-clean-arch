@@ -27,3 +27,7 @@ type AuthValidator interface {
 type ForgotPassResetValidator interface {
 	Validate(ctx context.Context, fpr *ForgotPassReset) (IsValid, Message, error)
 }
+
+type AuthRepository interface {
+	GetByLogin(ctx context.Context, login string) (*Auth, error)
+}

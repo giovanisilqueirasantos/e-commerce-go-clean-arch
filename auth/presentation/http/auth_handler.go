@@ -12,7 +12,7 @@ type AuthHandler struct {
 	AuthUseCase              domain.AuthUseCase
 	AuthValidator            domain.AuthValidator
 	UserValidator            domain.UserValidator
-    ForgotPassResetValidator domain.ForgotPassResetValidator
+	ForgotPassResetValidator domain.ForgotPassResetValidator
 }
 
 func InitAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator, uv domain.UserValidator, fprv domain.ForgotPassResetValidator) {
@@ -20,13 +20,13 @@ func InitAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidat
 		AuthUseCase:              auc,
 		AuthValidator:            av,
 		UserValidator:            uv,
-        ForgotPassResetValidator: fprv,
+		ForgotPassResetValidator: fprv,
 	}
 
 	e.POST("/login", handler.Login)
 	e.POST("/signup", handler.SignUp)
 	e.POST("/forgotpass/code", handler.ForgotPassCode)
-    e.POST("/forgotpass/reset", handler.ForgotPassReset)
+	e.POST("/forgotpass/reset", handler.ForgotPassReset)
 }
 
 func (ah *AuthHandler) Login(c echo.Context) error {
@@ -76,8 +76,8 @@ func (ah *AuthHandler) SignUp(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	auth := domain.Auth{
-		Login:           authWithUser.Login,
-		Password:        authWithUser.Password,
+		Login:    authWithUser.Login,
+		Password: authWithUser.Password,
 	}
 
 	isValidAuth, messageAuth, errValidAuth := ah.AuthValidator.Validate(ctx, &auth)
@@ -155,7 +155,7 @@ func (ah *AuthHandler) ForgotPassCode(c echo.Context) error {
 }
 
 func (ah *AuthHandler) ForgotPassReset(c echo.Context) error {
-    var fpr domain.ForgotPassReset
+	var fpr domain.ForgotPassReset
 
 	err := c.Bind(&fpr)
 
@@ -176,7 +176,7 @@ func (ah *AuthHandler) ForgotPassReset(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, messageForgotPassReset)
 	}
 
-    token, errToken := ah.AuthUseCase.ForgotPassReset(ctx, &fpr)
+	token, errToken := ah.AuthUseCase.ForgotPassReset(ctx, &fpr)
 
 	if errToken != nil {
 		log.Printf("Error trying to reset user's password: %s", errToken.Error())
