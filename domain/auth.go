@@ -19,6 +19,15 @@ type AuthUseCase interface {
 	ForgotPassReset(ctx context.Context, fpr *ForgotPassReset) (Token, error)
 }
 
+type AuthService interface {
+	EncodePass(ctx context.Context, pass string) string
+	PassIsEqualHashedPass(ctx context.Context, pass string, hashedPass string) bool
+}
+
+type AuthRepository interface {
+	GetByLogin(ctx context.Context, login string) (*Auth, error)
+}
+
 type AuthValidator interface {
 	Validate(ctx context.Context, a *Auth) (IsValid, Message, error)
 	ValidateLogin(ctx context.Context, login string) (IsValid, Message, error)
@@ -26,8 +35,4 @@ type AuthValidator interface {
 
 type ForgotPassResetValidator interface {
 	Validate(ctx context.Context, fpr *ForgotPassReset) (IsValid, Message, error)
-}
-
-type AuthRepository interface {
-	GetByLogin(ctx context.Context, login string) (*Auth, error)
 }

@@ -8,12 +8,16 @@ import (
 )
 
 type authUseCase struct {
-	authRepo domain.AuthRepository
+	authService  domain.AuthService
+	tokenService domain.TokenService
+	authRepo     domain.AuthRepository
 }
 
-func NewAuthUseCase(ar domain.AuthRepository) domain.AuthUseCase {
+func NewAuthUseCase(as domain.AuthService, ts domain.TokenService, ar domain.AuthRepository) domain.AuthUseCase {
 	return &authUseCase{
-		authRepo: ar,
+		authService:  as,
+		tokenService: ts,
+		authRepo:     ar,
 	}
 }
 
@@ -28,7 +32,23 @@ func (au *authUseCase) Login(ctx context.Context, a *domain.Auth) (domain.Token,
 		return "", fmt.Errorf("auth with login %s not found", a.Login)
 	}
 
-	return "token", nil
+	if !au.authService.PassIsEqualHashedPass(ctx, a.Password, auth.Password) {
+		return "", fmt.Errorf("wrong password for login %s", a.Login)
+	}
+
+	var tokenInfo domain.TokenInfo
+
+	tokenInfo.Info = a.Login
+
+	var thirtyDaysInMinutes int64 = 43200
+
+	token, tokenErr := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
+
+	if tokenErr != nil {
+		return "", tokenErr
+	}
+
+	return token, nil
 }
 
 func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.User) error {
