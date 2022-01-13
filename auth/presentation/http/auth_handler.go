@@ -8,28 +8,29 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type AuthHandler struct {
+type authHandler struct {
 	AuthUseCase              domain.AuthUseCase
 	AuthValidator            domain.AuthValidator
 	UserValidator            domain.UserValidator
 	ForgotPassResetValidator domain.ForgotPassResetValidator
 }
 
-func InitAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator, uv domain.UserValidator, fprv domain.ForgotPassResetValidator) {
-	handler := &AuthHandler{
+func NewAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator, uv domain.UserValidator, fprv domain.ForgotPassResetValidator) *authHandler {
+	handler := &authHandler{
 		AuthUseCase:              auc,
 		AuthValidator:            av,
 		UserValidator:            uv,
 		ForgotPassResetValidator: fprv,
 	}
-
 	e.POST("/login", handler.Login)
 	e.POST("/signup", handler.SignUp)
 	e.POST("/forgotpass/code", handler.ForgotPassCode)
 	e.POST("/forgotpass/reset", handler.ForgotPassReset)
+
+	return handler
 }
 
-func (ah *AuthHandler) Login(c echo.Context) error {
+func (ah *authHandler) Login(c echo.Context) error {
 	var auth domain.Auth
 
 	err := c.Bind(&auth)
@@ -61,7 +62,7 @@ func (ah *AuthHandler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"token": string(token)})
 }
 
-func (ah *AuthHandler) SignUp(c echo.Context) error {
+func (ah *authHandler) SignUp(c echo.Context) error {
 	var authWithUser struct {
 		domain.Auth
 		domain.User
@@ -120,7 +121,7 @@ func (ah *AuthHandler) SignUp(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 
-func (ah *AuthHandler) ForgotPassCode(c echo.Context) error {
+func (ah *authHandler) ForgotPassCode(c echo.Context) error {
 	var forgotPassReq struct {
 		Login string `json:"login"`
 	}
@@ -154,7 +155,7 @@ func (ah *AuthHandler) ForgotPassCode(c echo.Context) error {
 	return c.String(http.StatusOK, "")
 }
 
-func (ah *AuthHandler) ForgotPassReset(c echo.Context) error {
+func (ah *authHandler) ForgotPassReset(c echo.Context) error {
 	var fpr domain.ForgotPassReset
 
 	err := c.Bind(&fpr)

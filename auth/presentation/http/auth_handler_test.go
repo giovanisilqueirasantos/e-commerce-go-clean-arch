@@ -23,7 +23,7 @@ func TestLoginWrongBody(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	handler := AuthHandler{}
+	handler := NewAuthHandler(echo.New(), nil, nil, nil, nil)
 
 	handler.Login(c)
 
@@ -50,9 +50,7 @@ func TestLoginErrorValidatingAuth(t *testing.T) {
 
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", errors.New("error message"))
 
-	handler := AuthHandler{
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil, nil)
 
 	handler.Login(c)
 
@@ -79,9 +77,7 @@ func TestLoginAuthInvalid(t *testing.T) {
 
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", nil)
 
-	handler := AuthHandler{
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil, nil)
 
 	handler.Login(c)
 
@@ -110,10 +106,7 @@ func TestLoginErrorGeneratingToken(t *testing.T) {
 	mockAuthUsecase.On("Login", mock.Anything, &mockAuth).Return("", errors.New("error message"))
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
 
-	handler := AuthHandler{
-		AuthUseCase:   mockAuthUsecase,
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, nil, nil)
 
 	handler.Login(c)
 
@@ -142,10 +135,7 @@ func TestLoginSuccess(t *testing.T) {
 	mockAuthUsecase.On("Login", mock.Anything, &mockAuth).Return("valid token", nil)
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
 
-	handler := AuthHandler{
-		AuthUseCase:   mockAuthUsecase,
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, nil, nil)
 
 	err = handler.Login(c)
 	require.NoError(t, err)
@@ -162,7 +152,7 @@ func TestSignUpWrongBody(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	handler := AuthHandler{}
+	handler := NewAuthHandler(echo.New(), nil, nil, nil, nil)
 
 	handler.SignUp(c)
 
@@ -189,9 +179,7 @@ func TestSignUpErrorValidatingAuth(t *testing.T) {
 
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", errors.New("error message"))
 
-	handler := AuthHandler{
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil, nil)
 
 	handler.SignUp(c)
 
@@ -218,9 +206,7 @@ func TestSignUpAuthInvalid(t *testing.T) {
 
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", nil)
 
-	handler := AuthHandler{
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil, nil)
 
 	handler.SignUp(c)
 
@@ -257,10 +243,7 @@ func TestSignUpErrorValidatingUser(t *testing.T) {
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
 	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(false, "error message", errors.New("error message"))
 
-	handler := AuthHandler{
-		AuthValidator: mockAuthValidator,
-		UserValidator: mockUserValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, mockUserValidator, nil)
 
 	handler.SignUp(c)
 
@@ -297,10 +280,7 @@ func TestSignUpUserInvalid(t *testing.T) {
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
 	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(false, "error message", nil)
 
-	handler := AuthHandler{
-		AuthValidator: mockAuthValidator,
-		UserValidator: mockUserValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, mockUserValidator, nil)
 
 	handler.SignUp(c)
 
@@ -339,11 +319,7 @@ func TestSignUpErrorOnSignUp(t *testing.T) {
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
 	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(true, "", nil)
 
-	handler := AuthHandler{
-		AuthUseCase:   mockAuthUsecase,
-		AuthValidator: mockAuthValidator,
-		UserValidator: mockUserValidator,
-	}
+	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, mockUserValidator, nil)
 
 	handler.SignUp(c)
 
@@ -382,11 +358,7 @@ func TestSignUpSuccess(t *testing.T) {
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
 	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(true, "", nil)
 
-	handler := AuthHandler{
-		AuthUseCase:   mockAuthUsecase,
-		AuthValidator: mockAuthValidator,
-		UserValidator: mockUserValidator,
-	}
+	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, mockUserValidator, nil)
 
 	handler.SignUp(c)
 
@@ -401,7 +373,7 @@ func TestForgotPassCodeWrongBody(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	handler := AuthHandler{}
+	handler := NewAuthHandler(echo.New(), nil, nil, nil, nil)
 
 	handler.ForgotPassCode(c)
 
@@ -425,9 +397,7 @@ func TestForgotPassCodeErrorInvalidLogin(t *testing.T) {
 
 	mockAuthValidator.On("ValidateLogin", mock.Anything, "invalid login").Return(false, "error message", errors.New("error message"))
 
-	handler := AuthHandler{
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil, nil)
 
 	handler.ForgotPassCode(c)
 
@@ -453,10 +423,7 @@ func TestForgotPassCodeErrorSendingCode(t *testing.T) {
 	mockAuthUsecase.On("ForgotPassCode", mock.Anything, "valid login").Return(errors.New("error message"))
 	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "", nil)
 
-	handler := AuthHandler{
-		AuthUseCase:   mockAuthUsecase,
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, nil, nil)
 
 	handler.ForgotPassCode(c)
 
@@ -482,10 +449,7 @@ func TestForgotPassCodeSuccess(t *testing.T) {
 	mockAuthUsecase.On("ForgotPassCode", mock.Anything, "valid login").Return(nil)
 	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "", nil)
 
-	handler := AuthHandler{
-		AuthUseCase:   mockAuthUsecase,
-		AuthValidator: mockAuthValidator,
-	}
+	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, nil, nil)
 
 	handler.ForgotPassCode(c)
 
@@ -500,7 +464,7 @@ func TestForgotPassResetWrongBody(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	handler := AuthHandler{}
+	handler := NewAuthHandler(echo.New(), nil, nil, nil, nil)
 
 	handler.ForgotPassReset(c)
 
@@ -527,9 +491,7 @@ func TestForgotPassResetErrorValidatingForgotPassReset(t *testing.T) {
 
 	mockForgotPassResetValidator.On("Validate", mock.Anything, &mockForgotPassReset).Return(false, "error message", errors.New("error message"))
 
-	handler := AuthHandler{
-		ForgotPassResetValidator: mockForgotPassResetValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, nil, nil, mockForgotPassResetValidator)
 
 	handler.ForgotPassReset(c)
 
@@ -556,9 +518,7 @@ func TestForgotPassResetForgotPassResetInvalid(t *testing.T) {
 
 	mockForgotPassResetValidator.On("Validate", mock.Anything, &mockForgotPassReset).Return(false, "error message", nil)
 
-	handler := AuthHandler{
-		ForgotPassResetValidator: mockForgotPassResetValidator,
-	}
+	handler := NewAuthHandler(echo.New(), nil, nil, nil, mockForgotPassResetValidator)
 
 	handler.ForgotPassReset(c)
 
@@ -587,10 +547,7 @@ func TestForgotPassResetErrorResettingPassword(t *testing.T) {
 	mockAuthUsecase.On("ForgotPassReset", mock.Anything, &mockForgotPassReset).Return("", errors.New("error message"))
 	mockForgotPassResetValidator.On("Validate", mock.Anything, &mockForgotPassReset).Return(true, "", nil)
 
-	handler := AuthHandler{
-		AuthUseCase:              mockAuthUsecase,
-		ForgotPassResetValidator: mockForgotPassResetValidator,
-	}
+	handler := NewAuthHandler(echo.New(), mockAuthUsecase, nil, nil, mockForgotPassResetValidator)
 
 	handler.ForgotPassReset(c)
 
@@ -619,10 +576,7 @@ func TestForgotPassResetSuccess(t *testing.T) {
 	mockAuthUsecase.On("ForgotPassReset", mock.Anything, &mockForgotPassReset).Return("valid token", nil)
 	mockForgotPassResetValidator.On("Validate", mock.Anything, &mockForgotPassReset).Return(true, "", nil)
 
-	handler := AuthHandler{
-		AuthUseCase:              mockAuthUsecase,
-		ForgotPassResetValidator: mockForgotPassResetValidator,
-	}
+	handler := NewAuthHandler(echo.New(), mockAuthUsecase, nil, nil, mockForgotPassResetValidator)
 
 	handler.ForgotPassReset(c)
 
