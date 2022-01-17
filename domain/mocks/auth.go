@@ -74,5 +74,8 @@ type MockAuthRepository struct {
 
 func (mar *MockAuthRepository) GetByLogin(ctx context.Context, login string) (*domain.Auth, error) {
 	args := mar.Called(ctx, login)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return &domain.Auth{Login: args.String(0), Password: args.String(1)}, args.Error(2)
 }
