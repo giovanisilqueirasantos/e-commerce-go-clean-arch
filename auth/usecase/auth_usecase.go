@@ -51,8 +51,38 @@ func (au *authUseCase) Login(ctx context.Context, a *domain.Auth) (domain.Token,
 	return token, nil
 }
 
-func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.User) error {
-	return nil
+func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.User) (domain.Token, error) {
+	auth, errAuth := au.authRepo.GetByLogin(ctx, a.Login)
+
+	if errAuth != nil {
+		return "", errAuth
+	}
+
+	if auth != nil {
+		return "", fmt.Errorf("auth with login %s already exists", a.Login)
+	}
+
+	a.Password = au.authService.EncodePass(ctx, a.Password)
+
+	storeErr := au.authRepo.StoreWithUser(ctx, a, u)
+
+	if storeErr != nil {
+		return "", storeErr
+	}
+
+	var tokenInfo domain.TokenInfo
+
+	tokenInfo.Info = a.Login
+
+	var thirtyDaysInMinutes int64 = 43200
+
+	token, tokenErr := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
+
+	if tokenErr != nil {
+		return "", tokenErr
+	}
+
+	return token, nil
 }
 
 func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {

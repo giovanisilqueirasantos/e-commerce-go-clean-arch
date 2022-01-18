@@ -315,7 +315,7 @@ func TestSignUpErrorOnSignUp(t *testing.T) {
 	mockUser.PhoneNumber = "valid phone number"
 	mockUser.Address = "valid address"
 
-	mockAuthUsecase.On("SignUp", mock.Anything, &mockAuth, &mockUser).Return(errors.New("error message"))
+	mockAuthUsecase.On("SignUp", mock.Anything, &mockAuth, &mockUser).Return("", errors.New("error message"))
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
 	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(true, "", nil)
 
@@ -354,7 +354,7 @@ func TestSignUpSuccess(t *testing.T) {
 	mockUser.PhoneNumber = "valid phone number"
 	mockUser.Address = "valid address"
 
-	mockAuthUsecase.On("SignUp", mock.Anything, &mockAuth, &mockUser).Return(nil)
+	mockAuthUsecase.On("SignUp", mock.Anything, &mockAuth, &mockUser).Return("valid token", nil)
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
 	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(true, "", nil)
 
@@ -363,6 +363,7 @@ func TestSignUpSuccess(t *testing.T) {
 	handler.SignUp(c)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "{\"token\":\"valid token\"}\n", rec.Body.String())
 }
 
 func TestForgotPassCodeWrongBody(t *testing.T) {

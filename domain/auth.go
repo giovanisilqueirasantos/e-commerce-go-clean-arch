@@ -14,7 +14,7 @@ type ForgotPassReset struct {
 
 type AuthUseCase interface {
 	Login(ctx context.Context, a *Auth) (Token, error)
-	SignUp(ctx context.Context, a *Auth, u *User) error
+	SignUp(ctx context.Context, a *Auth, u *User) (Token, error)
 	ForgotPassCode(ctx context.Context, login string) error
 	ForgotPassReset(ctx context.Context, fpr *ForgotPassReset) (Token, error)
 }
@@ -26,6 +26,7 @@ type AuthService interface {
 
 type AuthRepository interface {
 	GetByLogin(ctx context.Context, login string) (*Auth, error)
+	StoreWithUser(ctx context.Context, a *Auth, u *User) error
 }
 
 type AuthValidator interface {

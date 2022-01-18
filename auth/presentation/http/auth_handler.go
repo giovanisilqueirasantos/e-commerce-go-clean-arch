@@ -111,14 +111,14 @@ func (ah *authHandler) SignUp(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, messageUser)
 	}
 
-	err = ah.AuthUseCase.SignUp(ctx, &authWithUser.Auth, &authWithUser.User)
+	token, tokenErr := ah.AuthUseCase.SignUp(ctx, &authWithUser.Auth, &authWithUser.User)
 
-	if err != nil {
-		log.Printf("Error trying to sign up: %s", err.Error())
+	if tokenErr != nil {
+		log.Printf("Error trying to sign up: %s", tokenErr.Error())
 		return c.JSON(http.StatusInternalServerError, "failed to sign up")
 	}
 
-	return c.String(http.StatusOK, "")
+	return c.JSON(http.StatusOK, map[string]string{"token": string(token)})
 }
 
 func (ah *authHandler) ForgotPassCode(c echo.Context) error {
