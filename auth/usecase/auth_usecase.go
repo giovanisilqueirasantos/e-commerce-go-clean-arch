@@ -11,13 +11,15 @@ type authUseCase struct {
 	authService  domain.AuthService
 	tokenService domain.TokenService
 	authRepo     domain.AuthRepository
+	userRepo     domain.UserRepository
 }
 
-func NewAuthUseCase(as domain.AuthService, ts domain.TokenService, ar domain.AuthRepository) domain.AuthUseCase {
+func NewAuthUseCase(as domain.AuthService, ts domain.TokenService, ar domain.AuthRepository, ur domain.UserRepository) domain.AuthUseCase {
 	return &authUseCase{
 		authService:  as,
 		tokenService: ts,
 		authRepo:     ar,
+		userRepo:     ur,
 	}
 }
 
@@ -60,6 +62,16 @@ func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.Use
 
 	if auth != nil {
 		return "", fmt.Errorf("auth with login %s already exists", a.Login)
+	}
+
+	user, errUser := au.userRepo.GetByEmail(ctx, u.Email)
+
+	if errUser != nil {
+		return "", errUser
+	}
+
+	if user != nil {
+		return "", fmt.Errorf("user with email %s already exists", u.Email)
 	}
 
 	a.Password = au.authService.EncodePass(ctx, a.Password)
