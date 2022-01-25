@@ -7,16 +7,11 @@ type Auth struct {
 	Password string `json:"password"`
 }
 
-type ForgotPassReset struct {
-	Code        string `json:"code"`
-	NewPassword string `json:"newPassword"`
-}
-
 type AuthUseCase interface {
 	Login(ctx context.Context, a *Auth) (Token, error)
 	SignUp(ctx context.Context, a *Auth, u *User) (Token, error)
 	ForgotPassCode(ctx context.Context, login string) error
-	ForgotPassReset(ctx context.Context, fpr *ForgotPassReset) (Token, error)
+	ForgotPassReset(ctx context.Context, code *Code, newPass string) (Token, error)
 }
 
 type AuthService interface {
@@ -32,8 +27,4 @@ type AuthRepository interface {
 type AuthValidator interface {
 	Validate(ctx context.Context, a *Auth) (IsValid, Message, error)
 	ValidateLogin(ctx context.Context, login string) (IsValid, Message, error)
-}
-
-type ForgotPassResetValidator interface {
-	Validate(ctx context.Context, fpr *ForgotPassReset) (IsValid, Message, error)
 }

@@ -9,18 +9,16 @@ import (
 )
 
 type authHandler struct {
-	AuthUseCase              domain.AuthUseCase
-	AuthValidator            domain.AuthValidator
-	UserValidator            domain.UserValidator
-	ForgotPassResetValidator domain.ForgotPassResetValidator
+	AuthUseCase   domain.AuthUseCase
+	AuthValidator domain.AuthValidator
+	UserValidator domain.UserValidator
 }
 
-func NewAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator, uv domain.UserValidator, fprv domain.ForgotPassResetValidator) *authHandler {
+func NewAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidator, uv domain.UserValidator) *authHandler {
 	handler := &authHandler{
-		AuthUseCase:              auc,
-		AuthValidator:            av,
-		UserValidator:            uv,
-		ForgotPassResetValidator: fprv,
+		AuthUseCase:   auc,
+		AuthValidator: av,
+		UserValidator: uv,
 	}
 	e.POST("/login", handler.Login)
 	e.POST("/signup", handler.SignUp)
@@ -156,28 +154,40 @@ func (ah *authHandler) ForgotPassCode(c echo.Context) error {
 }
 
 func (ah *authHandler) ForgotPassReset(c echo.Context) error {
-	var fpr domain.ForgotPassReset
+	var forgotPassResetReq struct {
+		Login   string `json:"login"`
+		Code    string `json:"code"`
+		NewPass string `json:"newPassword"`
+	}
 
-	err := c.Bind(&fpr)
+	err := c.Bind(&forgotPassResetReq)
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, "failed to interpret the submitted information")
 	}
 
+	if forgotPassResetReq.Code == "" {
+		return c.JSON(http.StatusBadRequest, "code can not be empty")
+	}
+
+	auth := domain.Auth{Login: forgotPassResetReq.Login, Password: forgotPassResetReq.NewPass}
+
 	ctx := c.Request().Context()
 
-	isValidForgotPassReset, messageForgotPassReset, errValidForgotPassReset := ah.ForgotPassResetValidator.Validate(ctx, &fpr)
+	isValid, message, errValid := ah.AuthValidator.Validate(ctx, &auth)
 
-	if errValidForgotPassReset != nil {
-		log.Printf("Error validating forgot password reset: %s", errValidForgotPassReset.Error())
+	if errValid != nil {
+		log.Printf("Error validating Auth: %s", errValid.Error())
 		return c.JSON(http.StatusInternalServerError, "failed to reset the password")
 	}
 
-	if !isValidForgotPassReset {
-		return c.JSON(http.StatusBadRequest, messageForgotPassReset)
+	if !isValid {
+		return c.JSON(http.StatusBadRequest, message)
 	}
 
-	token, errToken := ah.AuthUseCase.ForgotPassReset(ctx, &fpr)
+	code := domain.Code{Identifier: forgotPassResetReq.Login, Value: forgotPassResetReq.Code}
+
+	token, errToken := ah.AuthUseCase.ForgotPassReset(ctx, &code, forgotPassResetReq.NewPass)
 
 	if errToken != nil {
 		log.Printf("Error trying to reset user's password: %s", errToken.Error())

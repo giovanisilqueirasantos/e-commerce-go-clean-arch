@@ -101,6 +101,6 @@ func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
 	return nil
 }
 
-func (au *authUseCase) ForgotPassReset(ctx context.Context, fpr *domain.ForgotPassReset) (domain.Token, error) {
+func (au *authUseCase) ForgotPassReset(ctx context.Context, code *domain.Code, newPass string) (domain.Token, error) {
 	return "token", nil
 }

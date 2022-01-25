@@ -26,8 +26,8 @@ func (m *MockAuthUsecase) ForgotPassCode(ctx context.Context, login string) erro
 	return args.Error(0)
 }
 
-func (m *MockAuthUsecase) ForgotPassReset(ctx context.Context, fpr *domain.ForgotPassReset) (domain.Token, error) {
-	args := m.Called(ctx, fpr)
+func (m *MockAuthUsecase) ForgotPassReset(ctx context.Context, code *domain.Code, newPass string) (domain.Token, error) {
+	args := m.Called(ctx, code, newPass)
 	return domain.Token(args.String(0)), args.Error(1)
 }
 
@@ -42,15 +42,6 @@ func (mav *MockAuthValidator) Validate(ctx context.Context, a *domain.Auth) (dom
 
 func (mav *MockAuthValidator) ValidateLogin(ctx context.Context, login string) (domain.IsValid, domain.Message, error) {
 	args := mav.Called(ctx, login)
-	return domain.IsValid(args.Bool(0)), domain.Message(args.String(1)), args.Error(2)
-}
-
-type MockForgotPassResetValidator struct {
-	mock.Mock
-}
-
-func (mfprv *MockForgotPassResetValidator) Validate(ctx context.Context, fpr *domain.ForgotPassReset) (domain.IsValid, domain.Message, error) {
-	args := mfprv.Called(ctx, fpr)
 	return domain.IsValid(args.Bool(0)), domain.Message(args.String(1)), args.Error(2)
 }
 
