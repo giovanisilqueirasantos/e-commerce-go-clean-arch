@@ -36,6 +36,14 @@ func (mur *MockUserRepository) GetByEmail(ctx context.Context, email string) (*d
 	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: args.String(4)}, args.Error(5)
 }
 
+func (mur *MockUserRepository) GetByLogin(ctx context.Context, login string) (*domain.User, error) {
+	args := mur.Called(ctx, login)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: args.String(4)}, args.Error(5)
+}
+
 func (mur *MockUserRepository) Update(ctx context.Context, u *domain.User) error {
 	args := mur.Called(ctx, u)
 	return args.Error(0)

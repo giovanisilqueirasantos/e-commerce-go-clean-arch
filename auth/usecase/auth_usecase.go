@@ -8,18 +8,22 @@ import (
 )
 
 type authUseCase struct {
-	authService  domain.AuthService
-	tokenService domain.TokenService
-	authRepo     domain.AuthRepository
-	userRepo     domain.UserRepository
+	authService    domain.AuthService
+	tokenService   domain.TokenService
+	codeService    domain.CodeService
+	messageService domain.MessageService
+	authRepo       domain.AuthRepository
+	userRepo       domain.UserRepository
 }
 
-func NewAuthUseCase(as domain.AuthService, ts domain.TokenService, ar domain.AuthRepository, ur domain.UserRepository) domain.AuthUseCase {
+func NewAuthUseCase(as domain.AuthService, ts domain.TokenService, cs domain.CodeService, ms domain.MessageService, ar domain.AuthRepository, ur domain.UserRepository) domain.AuthUseCase {
 	return &authUseCase{
-		authService:  as,
-		tokenService: ts,
-		authRepo:     ar,
-		userRepo:     ur,
+		authService:    as,
+		tokenService:   ts,
+		codeService:    cs,
+		messageService: ms,
+		authRepo:       ar,
+		userRepo:       ur,
 	}
 }
 
@@ -98,6 +102,41 @@ func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.Use
 }
 
 func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
+	user, errUser := au.userRepo.GetByLogin(ctx, login)
+
+	if errUser != nil {
+		au.codeService.GenerateNewCodeFake(ctx)
+		au.messageService.SendMessageFake(ctx)
+		return errUser
+	}
+
+	if user == nil {
+		au.codeService.GenerateNewCodeFake(ctx)
+		au.messageService.SendMessageFake(ctx)
+		return fmt.Errorf("user with login %s not found", login)
+	}
+
+	code, errCode := au.codeService.GenerateNewCode(ctx, login, 6, true, false)
+
+	if errCode != nil {
+		au.messageService.SendMessageFake(ctx)
+		return errCode
+	}
+
+	message := fmt.Sprintf("O código para recuperar sua senha é %s", code.Value)
+
+	var messageConf domain.MessageConfig
+
+	messageConf.Medium = "phone"
+	messageConf.To = user.PhoneNumber
+	messageConf.Message = message
+
+	errMessage := au.messageService.SendMessage(ctx, &messageConf)
+
+	if errMessage != nil {
+		return errMessage
+	}
+
 	return nil
 }
 

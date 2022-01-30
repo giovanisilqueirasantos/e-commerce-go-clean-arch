@@ -9,6 +9,7 @@ type Code struct {
 
 type CodeService interface {
 	GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) (*Code, error)
+	GenerateNewCodeFake(ctx context.Context)
 }
 
 type CodeRepository interface {

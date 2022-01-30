@@ -13,6 +13,7 @@ type User struct {
 type UserRepository interface {
 	GetByID(ctx context.Context, id int64) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
+	GetByLogin(ctx context.Context, login string) (*User, error)
 	Update(ctx context.Context, u *User) error
 }
 

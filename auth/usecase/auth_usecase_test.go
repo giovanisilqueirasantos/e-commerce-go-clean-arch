@@ -19,7 +19,7 @@ func TestLoginCheckLoginExistsError(t *testing.T) {
 
 	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(nil, errors.New("error message"))
 
-	authUseCase := NewAuthUseCase(nil, nil, mockAuthRepo, nil)
+	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
 	_, errToken := authUseCase.Login(context.Background(), &mockAuth)
 
@@ -34,7 +34,7 @@ func TestLoginCheckLoginExists(t *testing.T) {
 
 	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(nil, nil)
 
-	authUseCase := NewAuthUseCase(nil, nil, mockAuthRepo, nil)
+	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
 	_, errToken := authUseCase.Login(context.Background(), &mockAuth)
 
@@ -53,7 +53,7 @@ func TestLoginPassIsEqualHashedPassError(t *testing.T) {
 
 	mockAuthService.On("PassIsEqualHashedPass", mock.Anything, mockAuth.Password, "valid password").Return(false)
 
-	authUseCase := NewAuthUseCase(mockAuthService, nil, mockAuthRepo, nil)
+	authUseCase := NewAuthUseCase(mockAuthService, nil, nil, nil, mockAuthRepo, nil)
 
 	_, errToken := authUseCase.Login(context.Background(), &mockAuth)
 
@@ -79,7 +79,7 @@ func TestLoginSignTokenError(t *testing.T) {
 
 	mockTokenService.On("Sign", mock.Anything, tokenInfo, thirtyDaysInMinutes).Return("", errors.New("error message"))
 
-	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, mockAuthRepo, nil)
+	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, nil, nil, mockAuthRepo, nil)
 
 	_, errToken := authUseCase.Login(context.Background(), &mockAuth)
 
@@ -105,7 +105,7 @@ func TestLoginSuccess(t *testing.T) {
 
 	mockTokenService.On("Sign", mock.Anything, tokenInfo, thirtyDaysInMinutes).Return("valid token", nil)
 
-	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, mockAuthRepo, nil)
+	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, nil, nil, mockAuthRepo, nil)
 
 	token, errToken := authUseCase.Login(context.Background(), &mockAuth)
 
@@ -121,7 +121,7 @@ func TestSignUpCheckLoginExistsError(t *testing.T) {
 
 	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(nil, errors.New("error message"))
 
-	authUseCase := NewAuthUseCase(nil, nil, mockAuthRepo, nil)
+	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
 	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, nil)
 
@@ -136,7 +136,7 @@ func TestSignUpLoginAlreadyExists(t *testing.T) {
 
 	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return("valid login", "valid password", nil)
 
-	authUseCase := NewAuthUseCase(nil, nil, mockAuthRepo, nil)
+	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
 	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, nil)
 
@@ -157,7 +157,7 @@ func TestSignUpCheckUserExistsError(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", mock.Anything, mockUser.Email).Return(nil, errors.New("error message"))
 
-	authUseCase := NewAuthUseCase(nil, nil, mockAuthRepo, mockUserRepo)
+	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, mockUserRepo)
 
 	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
@@ -178,7 +178,7 @@ func TestSignUpCheckUserExists(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", mock.Anything, mockUser.Email).Return("user email", "user first name", "user last name", "user phone number", "user addres", nil)
 
-	authUseCase := NewAuthUseCase(nil, nil, mockAuthRepo, mockUserRepo)
+	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, mockUserRepo)
 
 	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
@@ -204,7 +204,7 @@ func TestSignUpStoreUserError(t *testing.T) {
 	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return("valid login", "valid password", nil)
 	mockAuthRepo.On("StoreWithUser", mock.Anything, &domain.Auth{Login: mockAuth.Login, Password: "hashed password"}, &mockUser).Return(errors.New("error message"))
 
-	authUseCase := NewAuthUseCase(nil, nil, mockAuthRepo, mockUserRepo)
+	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, mockUserRepo)
 
 	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
@@ -237,7 +237,7 @@ func TestSignUpSignTokenError(t *testing.T) {
 
 	mockTokenService.On("Sign", mock.Anything, tokenInfo, thirtyDaysInMinutes).Return("", errors.New("error message"))
 
-	authUseCase := NewAuthUseCase(nil, mockTokenService, mockAuthRepo, mockUserRepo)
+	authUseCase := NewAuthUseCase(nil, mockTokenService, nil, nil, mockAuthRepo, mockUserRepo)
 
 	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
@@ -270,7 +270,7 @@ func TestSignUpSuccess(t *testing.T) {
 
 	mockTokenService.On("Sign", mock.Anything, tokenInfo, thirtyDaysInMinutes).Return("valid token", nil)
 
-	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, mockAuthRepo, mockUserRepo)
+	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, nil, nil, mockAuthRepo, mockUserRepo)
 
 	token, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
