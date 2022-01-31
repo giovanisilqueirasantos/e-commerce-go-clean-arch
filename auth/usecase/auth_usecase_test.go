@@ -277,3 +277,105 @@ func TestSignUpSuccess(t *testing.T) {
 	assert.Nil(t, errToken)
 	assert.Equal(t, token, domain.Token("valid token"))
 }
+
+func TestForgotPassCodeGetUserByLoginError(t *testing.T) {
+	mockUserRepo := new(mocks.MockUserRepository)
+	mockCodeService := new(mocks.MockCodeService)
+	mockMessageService := new(mocks.MockMessageService)
+
+	mockLogin := "valid login"
+
+	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return(nil, errors.New("error message"))
+
+	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
+
+	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+
+	assert.Error(t, errCode)
+}
+
+func TestForgotPassCodeNoUserFound(t *testing.T) {
+	mockUserRepo := new(mocks.MockUserRepository)
+	mockCodeService := new(mocks.MockCodeService)
+	mockMessageService := new(mocks.MockMessageService)
+
+	mockLogin := "valid login"
+
+	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return(nil, nil)
+
+	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
+
+	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+
+	assert.Error(t, errCode)
+}
+
+func TestForgotPassCodeGenerateCodeError(t *testing.T) {
+	mockUserRepo := new(mocks.MockUserRepository)
+	mockCodeService := new(mocks.MockCodeService)
+	mockMessageService := new(mocks.MockMessageService)
+
+	mockLogin := "valid login"
+
+	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return(nil, nil)
+
+	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, 6, true, false).Return(nil, errors.New("error message"))
+
+	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
+
+	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+
+	assert.Error(t, errCode)
+}
+
+func TestForgotPassCodeSendMessageError(t *testing.T) {
+	mockUserRepo := new(mocks.MockUserRepository)
+	mockCodeService := new(mocks.MockCodeService)
+	mockMessageService := new(mocks.MockMessageService)
+
+	mockLogin := "valid login"
+
+	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return("user email", "user first name", "user last name", "user phone number", "user address", nil)
+
+	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin, nil)
+
+	var messageConf domain.MessageConfig
+
+	messageConf.Medium = "phone"
+	messageConf.To = "user phone number"
+	messageConf.Message = "O código para recuperar sua senha é generated code"
+
+	mockMessageService.On("SendMessage", mock.Anything, &messageConf).Return(errors.New("error message"))
+
+	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
+
+	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+
+	assert.Error(t, errCode)
+}
+
+func TestForgotPassCodeSuccess(t *testing.T) {
+	mockUserRepo := new(mocks.MockUserRepository)
+	mockCodeService := new(mocks.MockCodeService)
+	mockMessageService := new(mocks.MockMessageService)
+
+	mockLogin := "valid login"
+
+	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return("user email", "user first name", "user last name", "user phone number", "user address", nil)
+
+	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin, nil)
+
+	var messageConf domain.MessageConfig
+
+	messageConf.Medium = "phone"
+	messageConf.To = "user phone number"
+	messageConf.Message = "O código para recuperar sua senha é generated code"
+
+	mockMessageService.On("SendMessage", mock.Anything, &messageConf).Return(nil)
+
+	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
+
+	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+
+	assert.Nil(t, errCode)
+}
