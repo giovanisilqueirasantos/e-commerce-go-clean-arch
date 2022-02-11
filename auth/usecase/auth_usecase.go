@@ -80,9 +80,7 @@ func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.Use
 
 	a.Password = au.authService.EncodePass(ctx, a.Password)
 
-	storeErr := au.authRepo.StoreWithUser(ctx, a, u)
-
-	if storeErr != nil {
+	if storeErr := au.authRepo.StoreWithUser(ctx, a, u); storeErr != nil {
 		return "", storeErr
 	}
 
@@ -131,9 +129,7 @@ func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
 	messageConf.To = user.PhoneNumber
 	messageConf.Message = message
 
-	errMessage := au.messageService.SendMessage(ctx, &messageConf)
-
-	if errMessage != nil {
+	if errMessage := au.messageService.SendMessage(ctx, &messageConf); errMessage != nil {
 		return errMessage
 	}
 
@@ -141,5 +137,36 @@ func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
 }
 
 func (au *authUseCase) ForgotPassReset(ctx context.Context, code *domain.Code, newPass string) (domain.Token, error) {
-	return "token", nil
+	codeIsValid, errCode := au.codeService.ValidateCode(ctx, code)
+
+	if errCode != nil {
+		return "", errCode
+	}
+
+	if !codeIsValid {
+		return "", fmt.Errorf("code %s with identifier %s is not valid", code.Value, code.Identifier)
+	}
+
+	var auth domain.Auth
+
+	auth.Login = code.Identifier
+	auth.Password = au.authService.EncodePass(ctx, newPass)
+
+	if err := au.authRepo.Update(ctx, &auth); err != nil {
+		return "", err
+	}
+
+	var tokenInfo domain.TokenInfo
+
+	tokenInfo.Info = code.Identifier
+
+	var thirtyDaysInMinutes int64 = 43200
+
+	token, tokenErr := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
+
+	if tokenErr != nil {
+		return "", tokenErr
+	}
+
+	return token, nil
 }

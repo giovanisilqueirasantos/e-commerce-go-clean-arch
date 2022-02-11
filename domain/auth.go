@@ -22,6 +22,7 @@ type AuthService interface {
 type AuthRepository interface {
 	GetByLogin(ctx context.Context, login string) (*Auth, error)
 	StoreWithUser(ctx context.Context, a *Auth, u *User) error
+	Update(ctx context.Context, a *Auth) error
 }
 
 type AuthValidator interface {

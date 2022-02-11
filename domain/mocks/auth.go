@@ -75,3 +75,8 @@ func (mar *MockAuthRepository) StoreWithUser(ctx context.Context, a *domain.Auth
 	args := mar.Called(ctx, a, u)
 	return args.Error(0)
 }
+
+func (mar *MockAuthRepository) Update(ctx context.Context, a *domain.Auth) error {
+	args := mar.Called(ctx, a)
+	return args.Error(0)
+}

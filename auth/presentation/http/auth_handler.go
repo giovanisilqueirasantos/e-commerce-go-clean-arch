@@ -31,9 +31,7 @@ func NewAuthHandler(e *echo.Echo, auc domain.AuthUseCase, av domain.AuthValidato
 func (ah *authHandler) Login(c echo.Context) error {
 	var auth domain.Auth
 
-	err := c.Bind(&auth)
-
-	if err != nil {
+	if err := c.Bind(&auth); err != nil {
 		return c.JSON(http.StatusBadRequest, "failed to interpret the submitted information")
 	}
 
@@ -66,9 +64,7 @@ func (ah *authHandler) SignUp(c echo.Context) error {
 		domain.User
 	}
 
-	err := c.Bind(&authWithUser)
-
-	if err != nil {
+	if err := c.Bind(&authWithUser); err != nil {
 		return c.JSON(http.StatusBadRequest, "failed to interpret the submitted information")
 	}
 
@@ -124,9 +120,7 @@ func (ah *authHandler) ForgotPassCode(c echo.Context) error {
 		Login string `json:"login"`
 	}
 
-	err := c.Bind(&forgotPassReq)
-
-	if err != nil {
+	if err := c.Bind(&forgotPassReq); err != nil {
 		return c.JSON(http.StatusBadRequest, "failed to interpret the submitted information")
 	}
 
@@ -143,9 +137,7 @@ func (ah *authHandler) ForgotPassCode(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, messageLogin)
 	}
 
-	err = ah.AuthUseCase.ForgotPassCode(ctx, forgotPassReq.Login)
-
-	if err != nil {
+	if err := ah.AuthUseCase.ForgotPassCode(ctx, forgotPassReq.Login); err != nil {
 		log.Printf("Error trying to send forgot password code: %s", err.Error())
 		return c.JSON(http.StatusInternalServerError, "failed to send forgot password code")
 	}
@@ -160,9 +152,7 @@ func (ah *authHandler) ForgotPassReset(c echo.Context) error {
 		NewPass string `json:"newPassword"`
 	}
 
-	err := c.Bind(&forgotPassResetReq)
-
-	if err != nil {
+	if err := c.Bind(&forgotPassResetReq); err != nil {
 		return c.JSON(http.StatusBadRequest, "failed to interpret the submitted information")
 	}
 
