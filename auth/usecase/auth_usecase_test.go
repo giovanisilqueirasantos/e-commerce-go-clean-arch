@@ -379,3 +379,145 @@ func TestForgotPassCodeSuccess(t *testing.T) {
 
 	assert.Nil(t, errCode)
 }
+
+func TestForgotPassResetValidateCodeError(t *testing.T) {
+	mockCodeService := new(mocks.MockCodeService)
+
+	var mockCode domain.Code
+
+	mockCode.Identifier = "identifier"
+	mockCode.Value = "Value"
+
+	mockCodeService.On("ValidateCode", mock.Anything, &mockCode).Return(false, errors.New("error message"))
+
+	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, nil, nil, nil)
+
+	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, "new pass")
+
+	assert.Error(t, errToken)
+}
+
+func TestForgotPassResetCodeInvalid(t *testing.T) {
+	mockCodeService := new(mocks.MockCodeService)
+
+	var mockCode domain.Code
+
+	mockCode.Identifier = "identifier"
+	mockCode.Value = "Value"
+
+	mockCodeService.On("ValidateCode", mock.Anything, &mockCode).Return(false, nil)
+
+	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, nil, nil, nil)
+
+	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, "new pass")
+
+	assert.Error(t, errToken)
+}
+
+func TestForgotPassResetUpdateAuthError(t *testing.T) {
+	mockCodeService := new(mocks.MockCodeService)
+	mockAuthService := new(mocks.MockAuthService)
+	mockAuthRepo := new(mocks.MockAuthRepository)
+
+	var mockCode domain.Code
+
+	mockNewPass := "new pass"
+	mockEncodedNewPass := "encoded new pass"
+
+	mockCode.Identifier = "identifier"
+	mockCode.Value = "Value"
+
+	mockCodeService.On("ValidateCode", mock.Anything, &mockCode).Return(true, nil)
+
+	mockAuthService.On("EncodePass", mock.Anything, mockNewPass).Return(mockEncodedNewPass)
+
+	var auth domain.Auth
+
+	auth.Login = mockCode.Identifier
+	auth.Password = mockEncodedNewPass
+
+	mockAuthRepo.On("Update", mock.Anything, &auth).Return(errors.New("error message"))
+
+	authUseCase := NewAuthUseCase(mockAuthService, nil, mockCodeService, nil, mockAuthRepo, nil)
+
+	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
+
+	assert.Error(t, errToken)
+}
+
+func TestForgotPassResetSignTokenError(t *testing.T) {
+	mockCodeService := new(mocks.MockCodeService)
+	mockAuthService := new(mocks.MockAuthService)
+	mockAuthRepo := new(mocks.MockAuthRepository)
+	mockTokenService := new(mocks.MockTokenService)
+
+	var mockCode domain.Code
+
+	mockNewPass := "new pass"
+	mockEncodedNewPass := "encoded new pass"
+
+	mockCode.Identifier = "identifier"
+	mockCode.Value = "Value"
+
+	mockCodeService.On("ValidateCode", mock.Anything, &mockCode).Return(true, nil)
+
+	mockAuthService.On("EncodePass", mock.Anything, mockNewPass).Return(mockEncodedNewPass)
+
+	var auth domain.Auth
+
+	auth.Login = mockCode.Identifier
+	auth.Password = mockEncodedNewPass
+
+	mockAuthRepo.On("Update", mock.Anything, &auth).Return(nil)
+
+	var thirtyDaysInMinutes int64 = 43200
+
+	tokenInfo := domain.TokenInfo{Info: mockCode.Identifier}
+
+	mockTokenService.On("Sign", mock.Anything, tokenInfo, thirtyDaysInMinutes).Return("", errors.New("error message"))
+
+	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, mockCodeService, nil, mockAuthRepo, nil)
+
+	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
+
+	assert.Error(t, errToken)
+}
+
+func TestForgotPassResetSuccess(t *testing.T) {
+	mockCodeService := new(mocks.MockCodeService)
+	mockAuthService := new(mocks.MockAuthService)
+	mockAuthRepo := new(mocks.MockAuthRepository)
+	mockTokenService := new(mocks.MockTokenService)
+
+	var mockCode domain.Code
+
+	mockNewPass := "new pass"
+	mockEncodedNewPass := "encoded new pass"
+
+	mockCode.Identifier = "identifier"
+	mockCode.Value = "Value"
+
+	mockCodeService.On("ValidateCode", mock.Anything, &mockCode).Return(true, nil)
+
+	mockAuthService.On("EncodePass", mock.Anything, mockNewPass).Return(mockEncodedNewPass)
+
+	var auth domain.Auth
+
+	auth.Login = mockCode.Identifier
+	auth.Password = mockEncodedNewPass
+
+	mockAuthRepo.On("Update", mock.Anything, &auth).Return(nil)
+
+	var thirtyDaysInMinutes int64 = 43200
+
+	tokenInfo := domain.TokenInfo{Info: mockCode.Identifier}
+
+	mockTokenService.On("Sign", mock.Anything, tokenInfo, thirtyDaysInMinutes).Return("valid token", nil)
+
+	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, mockCodeService, nil, mockAuthRepo, nil)
+
+	token, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
+
+	assert.Nil(t, errToken)
+	assert.Equal(t, token, domain.Token("valid token"))
+}
