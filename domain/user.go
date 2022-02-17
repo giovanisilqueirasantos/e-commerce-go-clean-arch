@@ -18,5 +18,5 @@ type UserRepository interface {
 }
 
 type UserValidator interface {
-	Validate(ctx context.Context, u *User) (IsValid, Message, error)
+	Validate(ctx context.Context, u *User) (IsValid, Message)
 }

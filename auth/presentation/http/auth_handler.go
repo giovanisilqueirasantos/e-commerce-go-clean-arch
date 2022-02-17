@@ -37,12 +37,7 @@ func (ah *authHandler) Login(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	isValid, message, errValid := ah.AuthValidator.Validate(ctx, &auth)
-
-	if errValid != nil {
-		log.Printf("Error validating Auth: %s", errValid.Error())
-		return c.JSON(http.StatusInternalServerError, "failed to login")
-	}
+	isValid, message := ah.AuthValidator.Validate(ctx, &auth)
 
 	if !isValid {
 		return c.JSON(http.StatusBadRequest, message)
@@ -75,12 +70,7 @@ func (ah *authHandler) SignUp(c echo.Context) error {
 		Password: authWithUser.Password,
 	}
 
-	isValidAuth, messageAuth, errValidAuth := ah.AuthValidator.Validate(ctx, &auth)
-
-	if errValidAuth != nil {
-		log.Printf("Error validating Auth: %s", errValidAuth.Error())
-		return c.JSON(http.StatusInternalServerError, "failed to sign up")
-	}
+	isValidAuth, messageAuth := ah.AuthValidator.Validate(ctx, &auth)
 
 	if !isValidAuth {
 		return c.JSON(http.StatusBadRequest, messageAuth)
@@ -94,12 +84,7 @@ func (ah *authHandler) SignUp(c echo.Context) error {
 		Address:     authWithUser.Address,
 	}
 
-	isValidUser, messageUser, errValidUser := ah.UserValidator.Validate(ctx, &user)
-
-	if errValidUser != nil {
-		log.Printf("Error validating User: %s", errValidUser.Error())
-		return c.JSON(http.StatusInternalServerError, "failed to sign up")
-	}
+	isValidUser, messageUser := ah.UserValidator.Validate(ctx, &user)
 
 	if !isValidUser {
 		return c.JSON(http.StatusBadRequest, messageUser)
@@ -126,12 +111,7 @@ func (ah *authHandler) ForgotPassCode(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	isValidLogin, messageLogin, errValidLogin := ah.AuthValidator.ValidateLogin(ctx, forgotPassReq.Login)
-
-	if errValidLogin != nil {
-		log.Printf("Error validating login: %s", errValidLogin.Error())
-		return c.JSON(http.StatusInternalServerError, "failed to send forgot password code")
-	}
+	isValidLogin, messageLogin := ah.AuthValidator.ValidateLogin(ctx, forgotPassReq.Login)
 
 	if !isValidLogin {
 		return c.JSON(http.StatusBadRequest, messageLogin)
@@ -164,12 +144,7 @@ func (ah *authHandler) ForgotPassReset(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	isValid, message, errValid := ah.AuthValidator.Validate(ctx, &auth)
-
-	if errValid != nil {
-		log.Printf("Error validating Auth: %s", errValid.Error())
-		return c.JSON(http.StatusInternalServerError, "failed to reset the password")
-	}
+	isValid, message := ah.AuthValidator.Validate(ctx, &auth)
 
 	if !isValid {
 		return c.JSON(http.StatusBadRequest, message)

@@ -26,6 +26,6 @@ type AuthRepository interface {
 }
 
 type AuthValidator interface {
-	Validate(ctx context.Context, a *Auth) (IsValid, Message, error)
-	ValidateLogin(ctx context.Context, login string) (IsValid, Message, error)
+	Validate(ctx context.Context, a *Auth) (IsValid, Message)
+	ValidateLogin(ctx context.Context, login string) (IsValid, Message)
 }

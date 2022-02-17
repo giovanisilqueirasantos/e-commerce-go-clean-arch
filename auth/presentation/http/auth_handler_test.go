@@ -31,33 +31,6 @@ func TestLoginWrongBody(t *testing.T) {
 	assert.NotEqual(t, "", rec.Body.String())
 }
 
-func TestLoginErrorValidatingAuth(t *testing.T) {
-	e := echo.New()
-	req, err := http.NewRequest(
-		echo.POST, "/login",
-		strings.NewReader("{\"login\":\"invalid login\",\"password\":\"invalid password\"}"),
-	)
-	req.Header.Add("content-type", "application/json")
-	assert.NoError(t, err)
-
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	mockAuthValidator := new(mocks.MockAuthValidator)
-	var mockAuth domain.Auth
-	mockAuth.Login = "invalid login"
-	mockAuth.Password = "invalid password"
-
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", errors.New("error message"))
-
-	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil)
-
-	handler.Login(c)
-
-	assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	assert.NotEqual(t, "", rec.Body.String())
-}
-
 func TestLoginAuthInvalid(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
@@ -75,7 +48,7 @@ func TestLoginAuthInvalid(t *testing.T) {
 	mockAuth.Login = "invalid login"
 	mockAuth.Password = "invalid password"
 
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message")
 
 	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil)
 
@@ -104,7 +77,7 @@ func TestLoginErrorGeneratingToken(t *testing.T) {
 	mockAuth.Password = "valid password"
 
 	mockAuthUsecase.On("Login", mock.Anything, &mockAuth).Return("", errors.New("error message"))
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
 
 	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, nil)
 
@@ -133,7 +106,7 @@ func TestLoginSuccess(t *testing.T) {
 	mockAuth.Password = "valid password"
 
 	mockAuthUsecase.On("Login", mock.Anything, &mockAuth).Return("valid token", nil)
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
 
 	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, nil)
 
@@ -160,33 +133,6 @@ func TestSignUpWrongBody(t *testing.T) {
 	assert.NotEqual(t, "", rec.Body.String())
 }
 
-func TestSignUpErrorValidatingAuth(t *testing.T) {
-	e := echo.New()
-	req, err := http.NewRequest(
-		echo.POST, "/signup",
-		strings.NewReader("{\"login\":\"invalid login\",\"password\":\"invalid password\"}"),
-	)
-	req.Header.Add("content-type", "application/json")
-	assert.NoError(t, err)
-
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	mockAuthValidator := new(mocks.MockAuthValidator)
-	var mockAuth domain.Auth
-	mockAuth.Login = "invalid login"
-	mockAuth.Password = "invalid password"
-
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", errors.New("error message"))
-
-	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil)
-
-	handler.SignUp(c)
-
-	assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	assert.NotEqual(t, "", rec.Body.String())
-}
-
 func TestSignUpAuthInvalid(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
@@ -204,7 +150,7 @@ func TestSignUpAuthInvalid(t *testing.T) {
 	mockAuth.Login = "invalid login"
 	mockAuth.Password = "invalid password"
 
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message")
 
 	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil)
 
@@ -212,43 +158,6 @@ func TestSignUpAuthInvalid(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	assert.Equal(t, "\"error message\"\n", rec.Body.String())
-}
-
-func TestSignUpErrorValidatingUser(t *testing.T) {
-	e := echo.New()
-	req, err := http.NewRequest(
-		echo.POST, "/signup",
-		strings.NewReader("{\"login\":\"valid login\",\"password\":\"valid password\",\"confirmPassword\":\"valid confirm password\",\"email\":\"invalidemail@email.com\",\"firstName\":\"invalid first name\",\"lastName\":\"invalid last name\",\"phoneNumber\":\"invalid phone number\",\"address\":\"invalid address\"}"),
-	)
-	req.Header.Add("content-type", "application/json")
-	assert.NoError(t, err)
-
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	mockAuthValidator := new(mocks.MockAuthValidator)
-	mockUserValidator := new(mocks.MockUserValidator)
-
-	var mockAuth domain.Auth
-	mockAuth.Login = "valid login"
-	mockAuth.Password = "valid password"
-
-	var mockUser domain.User
-	mockUser.Email = "invalidemail@email.com"
-	mockUser.FirstName = "invalid first name"
-	mockUser.LastName = "invalid last name"
-	mockUser.PhoneNumber = "invalid phone number"
-	mockUser.Address = "invalid address"
-
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
-	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(false, "error message", errors.New("error message"))
-
-	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, mockUserValidator)
-
-	handler.SignUp(c)
-
-	assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	assert.NotEqual(t, "", rec.Body.String())
 }
 
 func TestSignUpUserInvalid(t *testing.T) {
@@ -277,8 +186,8 @@ func TestSignUpUserInvalid(t *testing.T) {
 	mockUser.PhoneNumber = "invalid phone number"
 	mockUser.Address = "invalid address"
 
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
-	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(false, "error message", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
+	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(false, "error message")
 
 	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, mockUserValidator)
 
@@ -316,8 +225,8 @@ func TestSignUpErrorOnSignUp(t *testing.T) {
 	mockUser.Address = "valid address"
 
 	mockAuthUsecase.On("SignUp", mock.Anything, &mockAuth, &mockUser).Return("", errors.New("error message"))
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
-	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(true, "", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
+	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(true, "")
 
 	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, mockUserValidator)
 
@@ -355,8 +264,8 @@ func TestSignUpSuccess(t *testing.T) {
 	mockUser.Address = "valid address"
 
 	mockAuthUsecase.On("SignUp", mock.Anything, &mockAuth, &mockUser).Return("valid token", nil)
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
-	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(true, "", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
+	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(true, "")
 
 	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, mockUserValidator)
 
@@ -396,7 +305,7 @@ func TestForgotPassCodeErrorInvalidLogin(t *testing.T) {
 
 	mockAuthValidator := new(mocks.MockAuthValidator)
 
-	mockAuthValidator.On("ValidateLogin", mock.Anything, "invalid login").Return(false, "error message", errors.New("error message"))
+	mockAuthValidator.On("ValidateLogin", mock.Anything, "invalid login").Return(false, "error message")
 
 	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil)
 
@@ -422,7 +331,7 @@ func TestForgotPassCodeErrorSendingCode(t *testing.T) {
 	mockAuthValidator := new(mocks.MockAuthValidator)
 
 	mockAuthUsecase.On("ForgotPassCode", mock.Anything, "valid login").Return(errors.New("error message"))
-	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "", nil)
+	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "")
 
 	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, nil)
 
@@ -448,7 +357,7 @@ func TestForgotPassCodeSuccess(t *testing.T) {
 	mockAuthValidator := new(mocks.MockAuthValidator)
 
 	mockAuthUsecase.On("ForgotPassCode", mock.Anything, "valid login").Return(nil)
-	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "", nil)
+	mockAuthValidator.On("ValidateLogin", mock.Anything, "valid login").Return(true, "")
 
 	handler := NewAuthHandler(echo.New(), mockAuthUsecase, mockAuthValidator, nil)
 
@@ -493,33 +402,6 @@ func TestForgotPassResetErrorEmptyCode(t *testing.T) {
 	assert.NotEqual(t, "", rec.Body.String())
 }
 
-func TestForgotPassResetErrorValidatingAuth(t *testing.T) {
-	e := echo.New()
-	req, err := http.NewRequest(
-		echo.POST, "/forgotpass/reset",
-		strings.NewReader("{\"login\":\"valid login\",\"code\":\"valid code\",\"newPassword\":\"valid new password\"}"),
-	)
-	req.Header.Add("content-type", "application/json")
-	assert.NoError(t, err)
-
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	mockAuthValidator := new(mocks.MockAuthValidator)
-	var mockAuth domain.Auth
-	mockAuth.Login = "valid login"
-	mockAuth.Password = "valid new password"
-
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", errors.New("error message"))
-
-	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil)
-
-	handler.ForgotPassReset(c)
-
-	assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	assert.NotEqual(t, "", rec.Body.String())
-}
-
 func TestForogtPassResetAuthInvalid(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
@@ -537,7 +419,7 @@ func TestForogtPassResetAuthInvalid(t *testing.T) {
 	mockAuth.Login = "invalid login"
 	mockAuth.Password = "invalid new password"
 
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(false, "error message")
 
 	handler := NewAuthHandler(echo.New(), nil, mockAuthValidator, nil)
 
@@ -564,7 +446,7 @@ func TestForgotPassResetErrorResettingPassword(t *testing.T) {
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "valid new password"
 
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
 
 	mockAuthUsecase := new(mocks.MockAuthUsecase)
 
@@ -597,7 +479,7 @@ func TestForgotPassResetSuccess(t *testing.T) {
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "valid new password"
 
-	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "", nil)
+	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
 
 	mockAuthUsecase := new(mocks.MockAuthUsecase)
 

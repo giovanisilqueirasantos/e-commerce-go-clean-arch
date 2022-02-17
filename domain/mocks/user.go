@@ -11,9 +11,9 @@ type MockUserValidator struct {
 	mock.Mock
 }
 
-func (muv *MockUserValidator) Validate(ctx context.Context, u *domain.User) (domain.IsValid, domain.Message, error) {
+func (muv *MockUserValidator) Validate(ctx context.Context, u *domain.User) (domain.IsValid, domain.Message) {
 	args := muv.Called(ctx, u)
-	return domain.IsValid(args.Bool(0)), domain.Message(args.String(1)), args.Error(2)
+	return domain.IsValid(args.Bool(0)), domain.Message(args.String(1))
 }
 
 type MockUserRepository struct {
