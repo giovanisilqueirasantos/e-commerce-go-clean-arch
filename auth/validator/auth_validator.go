@@ -19,7 +19,7 @@ func (av *authValidator) Validate(ctx context.Context, a *domain.Auth) (domain.I
 		return false, "login or password can not be empty"
 	}
 
-	if _, err := mail.ParseAddress(a.Login); err == nil {
+	if _, err := mail.ParseAddress(a.Login); err != nil {
 		return false, "login is not a valid email"
 	}
 
