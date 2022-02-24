@@ -176,7 +176,7 @@ func TestSignUpCheckUserExists(t *testing.T) {
 
 	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(nil, nil)
 
-	mockUserRepo.On("GetByEmail", mock.Anything, mockUser.Email).Return("user email", "user first name", "user last name", "user phone number", "user addres", nil)
+	mockUserRepo.On("GetByEmail", mock.Anything, mockUser.Email).Return("user email", "user first name", "user last name", "user phone number", "user address city", "user address state", "user address neighborhood", "user address street", "user address number", "user address zipcode", nil)
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, mockUserRepo)
 
@@ -335,7 +335,7 @@ func TestForgotPassCodeSendMessageError(t *testing.T) {
 
 	mockLogin := "valid login"
 
-	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return("user email", "user first name", "user last name", "user phone number", "user address", nil)
+	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return("user email", "user first name", "user last name", "user phone number", "user address city", "user address state", "user address neighborhood", "user address street", "user address number", "user address zipcode", nil)
 
 	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin, nil)
 
@@ -361,7 +361,7 @@ func TestForgotPassCodeSuccess(t *testing.T) {
 
 	mockLogin := "valid login"
 
-	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return("user email", "user first name", "user last name", "user phone number", "user address", nil)
+	mockUserRepo.On("GetByLogin", mock.Anything, mockLogin).Return("user email", "user first name", "user last name", "user phone number", "user address city", "user address state", "user address neighborhood", "user address street", "user address number", "user address zipcode", nil)
 
 	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin, nil)
 

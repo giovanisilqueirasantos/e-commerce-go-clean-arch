@@ -25,7 +25,7 @@ func (mur *MockUserRepository) GetByID(ctx context.Context, id int64) (*domain.U
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: args.String(4)}, args.Error(5)
+	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: domain.UserAddress{City: args.String(4), State: args.String(5), Neighborhood: args.String(6), Street: args.String(7), Number: args.String(8), ZipCode: args.String(9)}}, args.Error(10)
 }
 
 func (mur *MockUserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
@@ -33,7 +33,7 @@ func (mur *MockUserRepository) GetByEmail(ctx context.Context, email string) (*d
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: args.String(4)}, args.Error(5)
+	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: domain.UserAddress{City: args.String(4), State: args.String(5), Neighborhood: args.String(6), Street: args.String(7), Number: args.String(8), ZipCode: args.String(9)}}, args.Error(10)
 }
 
 func (mur *MockUserRepository) GetByLogin(ctx context.Context, login string) (*domain.User, error) {
@@ -41,7 +41,7 @@ func (mur *MockUserRepository) GetByLogin(ctx context.Context, login string) (*d
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: args.String(4)}, args.Error(5)
+	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: domain.UserAddress{City: args.String(4), State: args.String(5), Neighborhood: args.String(6), Street: args.String(7), Number: args.String(8), ZipCode: args.String(9)}}, args.Error(10)
 }
 
 func (mur *MockUserRepository) Update(ctx context.Context, u *domain.User) error {

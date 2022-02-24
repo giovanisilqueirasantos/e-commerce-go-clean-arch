@@ -164,7 +164,7 @@ func TestSignUpUserInvalid(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
 		echo.POST, "/signup",
-		strings.NewReader("{\"login\":\"valid login\",\"password\":\"valid password\",\"confirmPassword\":\"valid confirm password\",\"email\":\"invalidemail@email.com\",\"firstName\":\"invalid first name\",\"lastName\":\"invalid last name\",\"phoneNumber\":\"invalid phone number\",\"address\":\"invalid address\"}"),
+		strings.NewReader("{\"login\":\"valid login\",\"password\":\"valid password\",\"confirmPassword\":\"valid confirm password\",\"email\":\"invalidemail@email.com\",\"firstName\":\"invalid first name\",\"lastName\":\"invalid last name\",\"phoneNumber\":\"invalid phone number\",\"address\":{\"city\":\"invalid city\",\"state\":\"invalid state\",\"neighborhood\":\"invalid neighborhood\",\"street\":\"invalid street\",\"number\":\"invalid number\",\"zipcode\":\"invalid zipcode\"}}"),
 	)
 	req.Header.Add("content-type", "application/json")
 	assert.NoError(t, err)
@@ -184,7 +184,14 @@ func TestSignUpUserInvalid(t *testing.T) {
 	mockUser.FirstName = "invalid first name"
 	mockUser.LastName = "invalid last name"
 	mockUser.PhoneNumber = "invalid phone number"
-	mockUser.Address = "invalid address"
+	mockUser.Address = domain.UserAddress{
+		City:         "invalid city",
+		State:        "invalid state",
+		Neighborhood: "invalid neighborhood",
+		Street:       "invalid street",
+		Number:       "invalid number",
+		ZipCode:      "invalid zipcode",
+	}
 
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
 	mockUserValidator.On("Validate", mock.Anything, &mockUser).Return(false, "error message")
@@ -201,7 +208,7 @@ func TestSignUpErrorOnSignUp(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
 		echo.POST, "/signup",
-		strings.NewReader("{\"login\":\"valid login\",\"password\":\"valid password\",\"confirmPassword\":\"valid confirm password\",\"email\":\"validemail@email.com\",\"firstName\":\"valid first name\",\"lastName\":\"valid last name\",\"phoneNumber\":\"valid phone number\",\"address\":\"valid address\"}"),
+		strings.NewReader("{\"login\":\"valid login\",\"password\":\"valid password\",\"confirmPassword\":\"valid confirm password\",\"email\":\"validemail@email.com\",\"firstName\":\"valid first name\",\"lastName\":\"valid last name\",\"phoneNumber\":\"valid phone number\",\"address\":{\"city\":\"valid city\",\"state\":\"valid state\",\"neighborhood\":\"valid neighborhood\",\"street\":\"valid street\",\"number\":\"valid number\",\"zipcode\":\"valid zipcode\"}}"),
 	)
 	req.Header.Add("content-type", "application/json")
 	assert.NoError(t, err)
@@ -222,7 +229,14 @@ func TestSignUpErrorOnSignUp(t *testing.T) {
 	mockUser.FirstName = "valid first name"
 	mockUser.LastName = "valid last name"
 	mockUser.PhoneNumber = "valid phone number"
-	mockUser.Address = "valid address"
+	mockUser.Address = domain.UserAddress{
+		City:         "valid city",
+		State:        "valid state",
+		Neighborhood: "valid neighborhood",
+		Street:       "valid street",
+		Number:       "valid number",
+		ZipCode:      "valid zipcode",
+	}
 
 	mockAuthUsecase.On("SignUp", mock.Anything, &mockAuth, &mockUser).Return("", errors.New("error message"))
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")
@@ -240,7 +254,7 @@ func TestSignUpSuccess(t *testing.T) {
 	e := echo.New()
 	req, err := http.NewRequest(
 		echo.POST, "/signup",
-		strings.NewReader("{\"login\":\"valid login\",\"password\":\"valid password\",\"confirmPassword\":\"valid confirm password\",\"email\":\"validemail@email.com\",\"firstName\":\"valid first name\",\"lastName\":\"valid last name\",\"phoneNumber\":\"valid phone number\",\"address\":\"valid address\"}"),
+		strings.NewReader("{\"login\":\"valid login\",\"password\":\"valid password\",\"confirmPassword\":\"valid confirm password\",\"email\":\"validemail@email.com\",\"firstName\":\"valid first name\",\"lastName\":\"valid last name\",\"phoneNumber\":\"valid phone number\",\"address\":{\"city\":\"valid city\",\"state\":\"valid state\",\"neighborhood\":\"valid neighborhood\",\"street\":\"valid street\",\"number\":\"valid number\",\"zipcode\":\"valid zipcode\"}}"),
 	)
 	req.Header.Add("content-type", "application/json")
 	assert.NoError(t, err)
@@ -261,7 +275,14 @@ func TestSignUpSuccess(t *testing.T) {
 	mockUser.FirstName = "valid first name"
 	mockUser.LastName = "valid last name"
 	mockUser.PhoneNumber = "valid phone number"
-	mockUser.Address = "valid address"
+	mockUser.Address = domain.UserAddress{
+		City:         "valid city",
+		State:        "valid state",
+		Neighborhood: "valid neighborhood",
+		Street:       "valid street",
+		Number:       "valid number",
+		ZipCode:      "valid zipcode",
+	}
 
 	mockAuthUsecase.On("SignUp", mock.Anything, &mockAuth, &mockUser).Return("valid token", nil)
 	mockAuthValidator.On("Validate", mock.Anything, &mockAuth).Return(true, "")

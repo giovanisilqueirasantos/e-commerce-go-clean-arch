@@ -3,11 +3,20 @@ package domain
 import "context"
 
 type User struct {
-	Email       string `json:"email"`
-	FirstName   string `json:"firstName"`
-	LastName    string `json:"lastName"`
-	PhoneNumber string `json:"phoneNumber"`
-	Address     string `json:"address"`
+	Email       string      `json:"email"`
+	FirstName   string      `json:"firstName"`
+	LastName    string      `json:"lastName"`
+	PhoneNumber string      `json:"phoneNumber"`
+	Address     UserAddress `json:"address"`
+}
+
+type UserAddress struct {
+	City         string `json:"city"`
+	State        string `json:"state"`
+	Neighborhood string `json:"neighborhood"`
+	Street       string `json:"street"`
+	Number       string `json:"number"`
+	ZipCode      string `json:"zipcode"`
 }
 
 type UserRepository interface {

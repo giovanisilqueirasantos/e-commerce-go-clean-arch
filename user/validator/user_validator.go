@@ -3,6 +3,7 @@ package validator
 import (
 	"context"
 	"net/mail"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -30,10 +31,6 @@ func (uv *userValidator) validate(ctx context.Context, u *domain.User) (domain.I
 
 	if u.PhoneNumber == "" {
 		return false, "user's phone number can not be empty"
-	}
-
-	if u.Address == "" {
-		return false, "user's address can not be empty"
 	}
 
 	if _, err := mail.ParseAddress(u.Email); err != nil {
@@ -65,6 +62,12 @@ func (uv *userValidator) validate(ctx context.Context, u *domain.User) (domain.I
 
 	if !lastNameIsAllLetter {
 		return false, "user's last name must contain only letters and spaces"
+	}
+
+	validPhone := regexp.MustCompile(`^\([0-9]{2}\) [0-9]{4, 5}-[0-9]{4}$`)
+
+	if !validPhone.MatchString(u.PhoneNumber) {
+		return false, "user's phone number must obey the format (11) 11111-1111"
 	}
 
 	return true, ""
