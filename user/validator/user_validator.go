@@ -33,6 +33,30 @@ func (uv *userValidator) validate(ctx context.Context, u *domain.User) (domain.I
 		return false, "user's phone number can not be empty"
 	}
 
+	if u.Address.City == "" {
+		return false, "user's address city can not be empty"
+	}
+
+	if u.Address.Neighborhood == "" {
+		return false, "user's address neighborhood can not be empty"
+	}
+
+	if u.Address.Number == "" {
+		return false, "user's address number can not be empty"
+	}
+
+	if u.Address.State == "" {
+		return false, "user's address state can not be empty"
+	}
+
+	if u.Address.Street == "" {
+		return false, "user's address street can not be empty"
+	}
+
+	if u.Address.ZipCode == "" {
+		return false, "user's address zipcode can not be empty"
+	}
+
 	if _, err := mail.ParseAddress(u.Email); err != nil {
 		return false, "user's email is not a valid email"
 	}
