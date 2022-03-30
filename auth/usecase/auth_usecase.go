@@ -147,12 +147,15 @@ func (au *authUseCase) ForgotPassReset(ctx context.Context, code *domain.Code, n
 		return "", fmt.Errorf("code %s with identifier %s is not valid", code.Value, code.Identifier)
 	}
 
-	var auth domain.Auth
+	auth, err := au.authRepo.GetByLogin(ctx, code.Identifier)
 
-	auth.Login = code.Identifier
+	if err != nil {
+		return "", err
+	}
+
 	auth.Password = au.authService.EncodePass(ctx, newPass)
 
-	if err := au.authRepo.Update(ctx, &auth); err != nil {
+	if err = au.authRepo.Update(ctx, auth); err != nil {
 		return "", err
 	}
 
