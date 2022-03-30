@@ -68,7 +68,7 @@ func (mar *MockAuthRepository) GetByLogin(ctx context.Context, login string) (*d
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return &domain.Auth{Login: args.String(0), Password: args.String(1)}, args.Error(2)
+	return &domain.Auth{ID: int64(args.Int(0)), Login: args.String(1), Password: args.String(2)}, args.Error(3)
 }
 
 func (mar *MockAuthRepository) StoreWithUser(ctx context.Context, a *domain.Auth, u *domain.User) error {

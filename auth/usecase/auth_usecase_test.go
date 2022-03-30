@@ -49,7 +49,7 @@ func TestLoginPassIsEqualHashedPassError(t *testing.T) {
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "invalid password"
 
-	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return("valid login", "valid password", nil)
+	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(1, "valid login", "valid password", nil)
 
 	mockAuthService.On("PassIsEqualHashedPass", mock.Anything, mockAuth.Password, "valid password").Return(false)
 
@@ -69,7 +69,7 @@ func TestLoginSignTokenError(t *testing.T) {
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "valid password"
 
-	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(mockAuth.Login, mockAuth.Password, nil)
+	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(1, mockAuth.Login, mockAuth.Password, nil)
 
 	mockAuthService.On("PassIsEqualHashedPass", mock.Anything, mockAuth.Password, mockAuth.Password).Return(true)
 
@@ -95,7 +95,7 @@ func TestLoginSuccess(t *testing.T) {
 	mockAuth.Login = "valid login"
 	mockAuth.Password = "valid password"
 
-	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(mockAuth.Login, mockAuth.Password, nil)
+	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(1, mockAuth.Login, mockAuth.Password, nil)
 
 	mockAuthService.On("PassIsEqualHashedPass", mock.Anything, mockAuth.Password, mockAuth.Password).Return(true)
 
@@ -134,7 +134,7 @@ func TestSignUpLoginAlreadyExists(t *testing.T) {
 	var mockAuth domain.Auth
 	mockAuth.Login = "valid login"
 
-	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return("valid login", "valid password", nil)
+	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(1, "valid login", "valid password", nil)
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
@@ -201,7 +201,7 @@ func TestSignUpStoreUserError(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", mock.Anything, mockUser.Email).Return(nil, nil)
 
-	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return("valid login", "valid password", nil)
+	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(1, "valid login", "valid password", nil)
 	mockAuthRepo.On("StoreWithUser", mock.Anything, &domain.Auth{Login: mockAuth.Login, Password: "hashed password"}, &mockUser).Return(errors.New("error message"))
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, mockUserRepo)
@@ -228,7 +228,7 @@ func TestSignUpSignTokenError(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", mock.Anything, mockUser.Email).Return(nil, nil)
 
-	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return("valid login", "valid password", nil)
+	mockAuthRepo.On("GetByLogin", mock.Anything, mockAuth.Login).Return(1, "valid login", "valid password", nil)
 	mockAuthRepo.On("StoreWithUser", mock.Anything, &domain.Auth{Login: mockAuth.Login, Password: "hashed password"}, &mockUser).Return(nil)
 
 	var thirtyDaysInMinutes int64 = 43200
@@ -414,6 +414,32 @@ func TestForgotPassResetCodeInvalid(t *testing.T) {
 	assert.Error(t, errToken)
 }
 
+func TestForgotPassResetGetAuthByLoginError(t *testing.T) {
+	mockCodeService := new(mocks.MockCodeService)
+	mockAuthService := new(mocks.MockAuthService)
+	mockAuthRepo := new(mocks.MockAuthRepository)
+
+	var mockCode domain.Code
+
+	mockNewPass := "new pass"
+	mockEncodedNewPass := "encoded new pass"
+
+	mockCode.Identifier = "identifier"
+	mockCode.Value = "Value"
+
+	mockCodeService.On("ValidateCode", mock.Anything, &mockCode).Return(true, nil)
+
+	mockAuthService.On("EncodePass", mock.Anything, mockNewPass).Return(mockEncodedNewPass)
+
+	mockAuthRepo.On("GetByLogin", mock.Anything, mockCode.Identifier).Return(nil, errors.New("error message"))
+
+	authUseCase := NewAuthUseCase(mockAuthService, nil, mockCodeService, nil, mockAuthRepo, nil)
+
+	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
+
+	assert.Error(t, errToken)
+}
+
 func TestForgotPassResetUpdateAuthError(t *testing.T) {
 	mockCodeService := new(mocks.MockCodeService)
 	mockAuthService := new(mocks.MockAuthService)
@@ -433,9 +459,11 @@ func TestForgotPassResetUpdateAuthError(t *testing.T) {
 
 	var auth domain.Auth
 
+	auth.ID = 1
 	auth.Login = mockCode.Identifier
 	auth.Password = mockEncodedNewPass
 
+	mockAuthRepo.On("GetByLogin", mock.Anything, auth.Login).Return(1, auth.Login, "valid password", nil)
 	mockAuthRepo.On("Update", mock.Anything, &auth).Return(errors.New("error message"))
 
 	authUseCase := NewAuthUseCase(mockAuthService, nil, mockCodeService, nil, mockAuthRepo, nil)
@@ -465,9 +493,11 @@ func TestForgotPassResetSignTokenError(t *testing.T) {
 
 	var auth domain.Auth
 
+	auth.ID = 1
 	auth.Login = mockCode.Identifier
 	auth.Password = mockEncodedNewPass
 
+	mockAuthRepo.On("GetByLogin", mock.Anything, auth.Login).Return(1, auth.Login, "valid password", nil)
 	mockAuthRepo.On("Update", mock.Anything, &auth).Return(nil)
 
 	var thirtyDaysInMinutes int64 = 43200
@@ -502,10 +532,11 @@ func TestForgotPassResetSuccess(t *testing.T) {
 	mockAuthService.On("EncodePass", mock.Anything, mockNewPass).Return(mockEncodedNewPass)
 
 	var auth domain.Auth
-
+	auth.ID = 1
 	auth.Login = mockCode.Identifier
 	auth.Password = mockEncodedNewPass
 
+	mockAuthRepo.On("GetByLogin", mock.Anything, auth.Login).Return(1, auth.Login, "valid password", nil)
 	mockAuthRepo.On("Update", mock.Anything, &auth).Return(nil)
 
 	var thirtyDaysInMinutes int64 = 43200
