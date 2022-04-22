@@ -20,7 +20,7 @@ func TestGetByLoginNotFound(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "login", "password"})
 
-	query := "SELECT id, login, password FROM auth WHERE login = \\?;"
+	query := regexp.QuoteMeta("SELECT id, login, password FROM auth WHERE login = ?;")
 
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
@@ -43,7 +43,7 @@ func TestGetByLoginError(t *testing.T) {
 		t.Fatalf("error when opening a stub database conn %s", err)
 	}
 
-	query := "SELECT id, login, password FROM auth WHERE login = \\?;"
+	query := regexp.QuoteMeta("SELECT id, login, password FROM auth WHERE login = ?;")
 
 	mock.ExpectQuery(query).WillReturnError(errors.New("error message"))
 
@@ -67,7 +67,7 @@ func TestGetByLogin(t *testing.T) {
 
 	rows := sqlmock.NewRows([]string{"id", "login", "password"}).AddRow(1, "login", "password")
 
-	query := "SELECT id, login, password FROM auth WHERE login = \\?;"
+	query := regexp.QuoteMeta("SELECT id, login, password FROM auth WHERE login = ?;")
 
 	mock.ExpectQuery(query).WillReturnRows(rows)
 
@@ -158,6 +158,52 @@ func TestStoreWithUser(t *testing.T) {
 	authMysqlRepository := NewAuthMysqlRepository(db)
 
 	err = authMysqlRepository.StoreWithUser(context.Background(), &domain.Auth{}, &domain.User{})
+
+	assert.NoError(t, err)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestUpdateError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatalf("error when opening a stub database conn %s", err)
+	}
+
+	query := regexp.QuoteMeta("UPDATE auth SET login=?, password=? WHERE id=?;")
+
+	mock.ExpectPrepare(query)
+	mock.ExpectExec(query).WithArgs("login", "password", 1).WillReturnError(errors.New("error message"))
+
+	authMysqlRepository := NewAuthMysqlRepository(db)
+
+	err = authMysqlRepository.Update(context.Background(), &domain.Auth{ID: 1, Login: "login", Password: "password"})
+
+	assert.Error(t, err)
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
+	if err != nil {
+		t.Fatalf("error when opening a stub database conn %s", err)
+	}
+
+	query := regexp.QuoteMeta("UPDATE auth SET login=?, password=? WHERE id=?;")
+
+	mock.ExpectPrepare(query)
+	mock.ExpectExec(query).WithArgs("login", "password", 1).WillReturnResult(sqlmock.NewResult(1, 1))
+
+	authMysqlRepository := NewAuthMysqlRepository(db)
+
+	err = authMysqlRepository.Update(context.Background(), &domain.Auth{ID: 1, Login: "login", Password: "password"})
 
 	assert.NoError(t, err)
 
