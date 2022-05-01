@@ -100,7 +100,7 @@ func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.Use
 }
 
 func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
-	user, errUser := au.userRepo.GetByLogin(ctx, login)
+	user, errUser := au.userRepo.GetByEmail(ctx, login)
 
 	if errUser != nil {
 		au.codeService.GenerateNewCodeFake(ctx)

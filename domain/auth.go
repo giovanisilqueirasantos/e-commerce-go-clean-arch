@@ -4,6 +4,7 @@ import "context"
 
 type Auth struct {
 	ID       int64
+	UUID     string `json:"uuid"`
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }

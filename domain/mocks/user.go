@@ -20,31 +20,10 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
-func (mur *MockUserRepository) GetByID(ctx context.Context, id int64) (*domain.User, error) {
-	args := mur.Called(ctx, id)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: domain.UserAddress{City: args.String(4), State: args.String(5), Neighborhood: args.String(6), Street: args.String(7), Number: args.String(8), ZipCode: args.String(9)}}, args.Error(10)
-}
-
 func (mur *MockUserRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	args := mur.Called(ctx, email)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: domain.UserAddress{City: args.String(4), State: args.String(5), Neighborhood: args.String(6), Street: args.String(7), Number: args.String(8), ZipCode: args.String(9)}}, args.Error(10)
-}
-
-func (mur *MockUserRepository) GetByLogin(ctx context.Context, login string) (*domain.User, error) {
-	args := mur.Called(ctx, login)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return &domain.User{Email: args.String(0), FirstName: args.String(1), LastName: args.String(2), PhoneNumber: args.String(3), Address: domain.UserAddress{City: args.String(4), State: args.String(5), Neighborhood: args.String(6), Street: args.String(7), Number: args.String(8), ZipCode: args.String(9)}}, args.Error(10)
-}
-
-func (mur *MockUserRepository) Update(ctx context.Context, u *domain.User) error {
-	args := mur.Called(ctx, u)
-	return args.Error(0)
+	return &domain.User{ID: int64(args.Int(0)), UUID: args.String(1), Email: args.String(2), FirstName: args.String(3), LastName: args.String(4), PhoneNumber: args.String(5), Address: domain.UserAddress{City: args.String(6), State: args.String(7), Neighborhood: args.String(8), Street: args.String(9), Number: args.String(10), ZipCode: args.String(11)}}, args.Error(12)
 }

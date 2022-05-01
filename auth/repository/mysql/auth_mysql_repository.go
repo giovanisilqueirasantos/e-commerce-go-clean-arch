@@ -6,24 +6,25 @@ import (
 	"fmt"
 
 	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/domain"
+	"github.com/google/uuid"
 )
 
 type authMysqlRepository struct {
 	Conn *sql.DB
 }
 
-func NewAuthMysqlRepository(Conn *sql.DB) domain.AuthRepository {
-	return &authMysqlRepository{Conn}
+func NewAuthMysqlRepository(conn *sql.DB) domain.AuthRepository {
+	return &authMysqlRepository{Conn: conn}
 }
 
 func (r *authMysqlRepository) GetByLogin(ctx context.Context, login string) (*domain.Auth, error) {
-	query := `SELECT id, login, password FROM auth WHERE login = ?;`
+	query := `SELECT id, uuid, login, password FROM auth WHERE login = ?;`
 
 	row := r.Conn.QueryRowContext(ctx, query, login)
 
 	var res domain.Auth
 
-	if err := row.Scan(&res.ID, &res.Login, &res.Password); err != nil {
+	if err := row.Scan(&res.ID, &res.UUID, &res.Login, &res.Password); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
@@ -35,8 +36,8 @@ func (r *authMysqlRepository) GetByLogin(ctx context.Context, login string) (*do
 }
 
 func (r *authMysqlRepository) StoreWithUser(ctx context.Context, a *domain.Auth, u *domain.User) error {
-	storeUserQuery := `INSERT INTO users (email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
-	storeAuthQuery := `INSERT INTO auth (login, password) VALUES (?, ?);`
+	storeUserQuery := `INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+	storeAuthQuery := `INSERT INTO auth (uuid, login, password) VALUES (?, ?);`
 
 	tx, err := r.Conn.BeginTx(ctx, nil)
 
@@ -50,7 +51,8 @@ func (r *authMysqlRepository) StoreWithUser(ctx context.Context, a *domain.Auth,
 		return storeUserStmtErr
 	}
 
-	if _, err = storeUserStmt.ExecContext(ctx, u.Email, u.FirstName, u.LastName, u.PhoneNumber, u.Address.City, u.Address.State, u.Address.Neighborhood, u.Address.Street, u.Address.Number, u.Address.ZipCode); err != nil {
+	u.UUID = uuid.NewString()
+	if _, err = storeUserStmt.ExecContext(ctx, u.UUID, u.Email, u.FirstName, u.LastName, u.PhoneNumber, u.Address.City, u.Address.State, u.Address.Neighborhood, u.Address.Street, u.Address.Number, u.Address.ZipCode); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -61,7 +63,8 @@ func (r *authMysqlRepository) StoreWithUser(ctx context.Context, a *domain.Auth,
 		return storeAuthStmtErr
 	}
 
-	if _, err = storeAuthStmt.ExecContext(ctx, a.Login, a.Password); err != nil {
+	a.UUID = uuid.NewString()
+	if _, err = storeAuthStmt.ExecContext(ctx, a.UUID, a.Login, a.Password); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -74,7 +77,7 @@ func (r *authMysqlRepository) StoreWithUser(ctx context.Context, a *domain.Auth,
 }
 
 func (r *authMysqlRepository) Update(ctx context.Context, a *domain.Auth) error {
-	query := `UPDATE auth SET login=?, password=? WHERE id=?;`
+	query := `UPDATE auth SET login=?, password=? WHERE uuid=?;`
 
 	stmt, stmtErr := r.Conn.PrepareContext(ctx, query)
 
@@ -82,7 +85,7 @@ func (r *authMysqlRepository) Update(ctx context.Context, a *domain.Auth) error 
 		return stmtErr
 	}
 
-	exec, execErr := stmt.ExecContext(ctx, a.Login, a.Password, a.ID)
+	exec, execErr := stmt.ExecContext(ctx, a.Login, a.Password, a.UUID)
 
 	if execErr != nil {
 		return execErr

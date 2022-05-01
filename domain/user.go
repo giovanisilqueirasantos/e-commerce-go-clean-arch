@@ -3,6 +3,8 @@ package domain
 import "context"
 
 type User struct {
+	ID          int64
+	UUID        string      `json:"uuid"`
 	Email       string      `json:"email"`
 	FirstName   string      `json:"firstName"`
 	LastName    string      `json:"lastName"`
@@ -20,10 +22,7 @@ type UserAddress struct {
 }
 
 type UserRepository interface {
-	GetByID(ctx context.Context, id int64) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
-	GetByLogin(ctx context.Context, login string) (*User, error)
-	Update(ctx context.Context, u *User) error
 }
 
 type UserValidator interface {
