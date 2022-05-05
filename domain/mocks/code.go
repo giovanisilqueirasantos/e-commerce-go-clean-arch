@@ -11,12 +11,9 @@ type MockCodeService struct {
 	mock.Mock
 }
 
-func (mcs *MockCodeService) GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) (*domain.Code, error) {
+func (mcs *MockCodeService) GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) *domain.Code {
 	args := mcs.Called(ctx, identifier, length, number, symbol)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return &domain.Code{Value: args.String(0), Identifier: args.String(1)}, args.Error(2)
+	return &domain.Code{Value: args.String(0), Identifier: args.String(1)}
 }
 
 func (mcs *MockCodeService) GenerateNewCodeFake(ctx context.Context) {}

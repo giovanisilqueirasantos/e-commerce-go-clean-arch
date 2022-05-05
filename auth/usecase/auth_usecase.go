@@ -114,12 +114,7 @@ func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
 		return fmt.Errorf("user with login %s not found", login)
 	}
 
-	code, errCode := au.codeService.GenerateNewCode(ctx, login, 6, true, false)
-
-	if errCode != nil {
-		au.messageService.SendMessageFake(ctx)
-		return errCode
-	}
+	code := au.codeService.GenerateNewCode(ctx, login, 6, true, false)
 
 	message := fmt.Sprintf("O código para recuperar sua senha é %s", code.Value)
 

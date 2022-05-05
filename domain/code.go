@@ -8,7 +8,7 @@ type Code struct {
 }
 
 type CodeService interface {
-	GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) (*Code, error)
+	GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) *Code
 	GenerateNewCodeFake(ctx context.Context)
 	ValidateCode(ctx context.Context, c *Code) (IsValid, error)
 }

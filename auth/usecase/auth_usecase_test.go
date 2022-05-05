@@ -311,24 +311,6 @@ func TestForgotPassCodeNoUserFound(t *testing.T) {
 	assert.Error(t, errCode)
 }
 
-func TestForgotPassCodeGenerateCodeError(t *testing.T) {
-	mockUserRepo := new(mocks.MockUserRepository)
-	mockCodeService := new(mocks.MockCodeService)
-	mockMessageService := new(mocks.MockMessageService)
-
-	mockLogin := "valid login"
-
-	mockUserRepo.On("GetByEmail", mock.Anything, mockLogin).Return(nil, nil)
-
-	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, 6, true, false).Return(nil, errors.New("error message"))
-
-	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
-
-	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
-
-	assert.Error(t, errCode)
-}
-
 func TestForgotPassCodeSendMessageError(t *testing.T) {
 	mockUserRepo := new(mocks.MockUserRepository)
 	mockCodeService := new(mocks.MockCodeService)
@@ -338,7 +320,7 @@ func TestForgotPassCodeSendMessageError(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", mock.Anything, mockLogin).Return(1, "uuid", "user email", "user first name", "user last name", "user phone number", "user address city", "user address state", "user address neighborhood", "user address street", "user address number", "user address zipcode", nil)
 
-	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin, nil)
+	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin)
 
 	var messageConf domain.MessageConfig
 
@@ -364,7 +346,7 @@ func TestForgotPassCodeSuccess(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", mock.Anything, mockLogin).Return(1, "uuid", "user email", "user first name", "user last name", "user phone number", "user address city", "user address state", "user address neighborhood", "user address street", "user address number", "user address zipcode", nil)
 
-	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin, nil)
+	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin)
 
 	var messageConf domain.MessageConfig
 
