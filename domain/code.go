@@ -8,12 +8,13 @@ type Code struct {
 }
 
 type CodeService interface {
-	GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) *Code
+	GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) (*Code, error)
 	GenerateNewCodeFake(ctx context.Context)
 	ValidateCode(ctx context.Context, c *Code) (IsValid, error)
 }
 
 type CodeRepository interface {
+	Store(ctx context.Context, code *Code) error
 	GetByValue(ctx context.Context, value string) (*Code, error)
 	DeleteByValue(ctx context.Context, value string) error
 }

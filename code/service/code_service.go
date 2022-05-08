@@ -16,7 +16,7 @@ func NewCodeService(cr domain.CodeRepository) *codeService {
 	return &codeService{codeRepo: cr}
 }
 
-func (cs *codeService) GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) *domain.Code {
+func (cs *codeService) GenerateNewCode(ctx context.Context, identifier string, length int8, number bool, symbol bool) (*domain.Code, error) {
 	rand.Seed(time.Now().UnixNano())
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	numberRunes := []rune("1234567890")
@@ -75,5 +75,14 @@ func (cs *codeService) GenerateNewCode(ctx context.Context, identifier string, l
 		code.Value = string(b)
 	}
 
-	return code
+	if err := cs.codeRepo.Store(ctx, code); err != nil {
+		return nil, err
+	}
+
+	return code, nil
+}
+
+func (cs *codeService) GenerateNewCodeFake(ctx context.Context) {
+	rand.Seed(time.Now().UnixNano())
+	time.Sleep(time.Duration((8 + rand.Intn(5))) * time.Second)
 }
