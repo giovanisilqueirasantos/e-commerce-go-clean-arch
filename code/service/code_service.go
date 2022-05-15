@@ -86,3 +86,21 @@ func (cs *codeService) GenerateNewCodeFake(ctx context.Context) {
 	rand.Seed(time.Now().UnixNano())
 	time.Sleep(time.Duration((8 + rand.Intn(5))) * time.Second)
 }
+
+func (cs *codeService) ValidateCode(ctx context.Context, c *domain.Code) (domain.IsValid, error) {
+	code, err := cs.codeRepo.GetByValue(ctx, c.Value)
+
+	if err != nil {
+		return false, err
+	}
+
+	if code.Identifier == c.Identifier && code.Value == c.Value {
+		if err := cs.codeRepo.DeleteByValue(ctx, c.Value); err != nil {
+			return false, err
+		} else {
+			return true, nil
+		}
+	} else {
+		return false, nil
+	}
+}
