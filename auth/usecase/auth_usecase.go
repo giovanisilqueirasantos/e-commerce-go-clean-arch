@@ -28,10 +28,10 @@ func NewAuthUseCase(as domain.AuthService, ts domain.TokenService, cs domain.Cod
 }
 
 func (au *authUseCase) Login(ctx context.Context, a *domain.Auth) (domain.Token, error) {
-	auth, errAuth := au.authRepo.GetByLogin(ctx, a.Login)
+	auth, err := au.authRepo.GetByLogin(ctx, a.Login)
 
-	if errAuth != nil {
-		return "", errAuth
+	if err != nil {
+		return "", err
 	}
 
 	if auth == nil {
@@ -48,30 +48,30 @@ func (au *authUseCase) Login(ctx context.Context, a *domain.Auth) (domain.Token,
 
 	var thirtyDaysInMinutes int64 = 43200
 
-	token, tokenErr := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
+	token, err := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
 
-	if tokenErr != nil {
-		return "", tokenErr
+	if err != nil {
+		return "", err
 	}
 
 	return token, nil
 }
 
 func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.User) (domain.Token, error) {
-	auth, errAuth := au.authRepo.GetByLogin(ctx, a.Login)
+	auth, err := au.authRepo.GetByLogin(ctx, a.Login)
 
-	if errAuth != nil {
-		return "", errAuth
+	if err != nil {
+		return "", err
 	}
 
 	if auth != nil {
 		return "", fmt.Errorf("auth with login %s already exists", a.Login)
 	}
 
-	user, errUser := au.userRepo.GetByEmail(ctx, u.Email)
+	user, err := au.userRepo.GetByEmail(ctx, u.Email)
 
-	if errUser != nil {
-		return "", errUser
+	if err != nil {
+		return "", err
 	}
 
 	if user != nil {
@@ -80,8 +80,8 @@ func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.Use
 
 	a.Password = au.authService.EncodePass(ctx, a.Password)
 
-	if storeErr := au.authRepo.StoreWithUser(ctx, a, u); storeErr != nil {
-		return "", storeErr
+	if err := au.authRepo.StoreWithUser(ctx, a, u); err != nil {
+		return "", err
 	}
 
 	var tokenInfo domain.TokenInfo
@@ -90,22 +90,22 @@ func (au *authUseCase) SignUp(ctx context.Context, a *domain.Auth, u *domain.Use
 
 	var thirtyDaysInMinutes int64 = 43200
 
-	token, tokenErr := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
+	token, err := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
 
-	if tokenErr != nil {
-		return "", tokenErr
+	if err != nil {
+		return "", err
 	}
 
 	return token, nil
 }
 
 func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
-	user, errUser := au.userRepo.GetByEmail(ctx, login)
+	user, err := au.userRepo.GetByEmail(ctx, login)
 
-	if errUser != nil {
+	if err != nil {
 		au.codeService.GenerateNewCodeFake(ctx)
 		au.messageService.SendMessageFake(ctx)
-		return errUser
+		return err
 	}
 
 	if user == nil {
@@ -114,7 +114,11 @@ func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
 		return fmt.Errorf("user with login %s not found", login)
 	}
 
-	code := au.codeService.GenerateNewCode(ctx, login, 6, true, false)
+	code, err := au.codeService.GenerateNewCode(ctx, login, 6, true, false)
+
+	if err != nil {
+		return err
+	}
 
 	message := fmt.Sprintf("O código para recuperar sua senha é %s", code.Value)
 
@@ -132,10 +136,10 @@ func (au *authUseCase) ForgotPassCode(ctx context.Context, login string) error {
 }
 
 func (au *authUseCase) ForgotPassReset(ctx context.Context, code *domain.Code, newPass string) (domain.Token, error) {
-	codeIsValid, errCode := au.codeService.ValidateCode(ctx, code)
+	codeIsValid, err := au.codeService.ValidateCode(ctx, code)
 
-	if errCode != nil {
-		return "", errCode
+	if err != nil {
+		return "", err
 	}
 
 	if !codeIsValid {
@@ -160,10 +164,10 @@ func (au *authUseCase) ForgotPassReset(ctx context.Context, code *domain.Code, n
 
 	var thirtyDaysInMinutes int64 = 43200
 
-	token, tokenErr := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
+	token, err := au.tokenService.Sign(ctx, tokenInfo, thirtyDaysInMinutes)
 
-	if tokenErr != nil {
-		return "", tokenErr
+	if err != nil {
+		return "", err
 	}
 
 	return token, nil

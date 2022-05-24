@@ -43,10 +43,10 @@ func (ah *authHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, message)
 	}
 
-	token, errToken := ah.AuthUseCase.Login(ctx, &auth)
+	token, err := ah.AuthUseCase.Login(ctx, &auth)
 
-	if errToken != nil {
-		log.Printf("Error trying to generate token for Login: %s", errToken.Error())
+	if err != nil {
+		log.Printf("Error trying to generate token for Login: %s", err.Error())
 		return c.JSON(http.StatusInternalServerError, "failed to login")
 	}
 
@@ -70,10 +70,10 @@ func (ah *authHandler) SignUp(c echo.Context) error {
 		Password: authWithUser.Password,
 	}
 
-	isValidAuth, messageAuth := ah.AuthValidator.Validate(ctx, &auth)
+	isValid, message := ah.AuthValidator.Validate(ctx, &auth)
 
-	if !isValidAuth {
-		return c.JSON(http.StatusBadRequest, messageAuth)
+	if !isValid {
+		return c.JSON(http.StatusBadRequest, message)
 	}
 
 	user := domain.User{
@@ -84,16 +84,16 @@ func (ah *authHandler) SignUp(c echo.Context) error {
 		Address:     authWithUser.Address,
 	}
 
-	isValidUser, messageUser := ah.UserValidator.Validate(ctx, &user)
+	isValid, message = ah.UserValidator.Validate(ctx, &user)
 
-	if !isValidUser {
-		return c.JSON(http.StatusBadRequest, messageUser)
+	if !isValid {
+		return c.JSON(http.StatusBadRequest, message)
 	}
 
-	token, tokenErr := ah.AuthUseCase.SignUp(ctx, &authWithUser.Auth, &authWithUser.User)
+	token, err := ah.AuthUseCase.SignUp(ctx, &authWithUser.Auth, &authWithUser.User)
 
-	if tokenErr != nil {
-		log.Printf("Error trying to sign up: %s", tokenErr.Error())
+	if err != nil {
+		log.Printf("Error trying to sign up: %s", err.Error())
 		return c.JSON(http.StatusInternalServerError, "failed to sign up")
 	}
 
@@ -111,10 +111,10 @@ func (ah *authHandler) ForgotPassCode(c echo.Context) error {
 
 	ctx := c.Request().Context()
 
-	isValidLogin, messageLogin := ah.AuthValidator.ValidateLogin(ctx, forgotPassReq.Login)
+	isValid, message := ah.AuthValidator.ValidateLogin(ctx, forgotPassReq.Login)
 
-	if !isValidLogin {
-		return c.JSON(http.StatusBadRequest, messageLogin)
+	if !isValid {
+		return c.JSON(http.StatusBadRequest, message)
 	}
 
 	if err := ah.AuthUseCase.ForgotPassCode(ctx, forgotPassReq.Login); err != nil {
@@ -152,10 +152,10 @@ func (ah *authHandler) ForgotPassReset(c echo.Context) error {
 
 	code := domain.Code{Identifier: forgotPassResetReq.Login, Value: forgotPassResetReq.Code}
 
-	token, errToken := ah.AuthUseCase.ForgotPassReset(ctx, &code, forgotPassResetReq.NewPass)
+	token, err := ah.AuthUseCase.ForgotPassReset(ctx, &code, forgotPassResetReq.NewPass)
 
-	if errToken != nil {
-		log.Printf("Error trying to reset user's password: %s", errToken.Error())
+	if err != nil {
+		log.Printf("Error trying to reset user's password: %s", err.Error())
 		return c.JSON(http.StatusInternalServerError, "failed to reset the password")
 	}
 

@@ -21,9 +21,9 @@ func TestLoginCheckLoginExistsError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.Login(context.Background(), &mockAuth)
+	_, err := authUseCase.Login(context.Background(), &mockAuth)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestLoginCheckLoginExists(t *testing.T) {
@@ -36,9 +36,9 @@ func TestLoginCheckLoginExists(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.Login(context.Background(), &mockAuth)
+	_, err := authUseCase.Login(context.Background(), &mockAuth)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestLoginPassIsEqualHashedPassError(t *testing.T) {
@@ -56,9 +56,9 @@ func TestLoginPassIsEqualHashedPassError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(mockAuthService, nil, nil, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.Login(context.Background(), &mockAuth)
+	_, err := authUseCase.Login(context.Background(), &mockAuth)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestLoginSignTokenError(t *testing.T) {
@@ -82,9 +82,9 @@ func TestLoginSignTokenError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, nil, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.Login(context.Background(), &mockAuth)
+	_, err := authUseCase.Login(context.Background(), &mockAuth)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestLoginSuccess(t *testing.T) {
@@ -108,9 +108,9 @@ func TestLoginSuccess(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, nil, nil, mockAuthRepo, nil)
 
-	token, errToken := authUseCase.Login(context.Background(), &mockAuth)
+	token, err := authUseCase.Login(context.Background(), &mockAuth)
 
-	assert.Nil(t, errToken)
+	assert.Nil(t, err)
 	assert.Equal(t, token, domain.Token("valid token"))
 }
 
@@ -124,9 +124,9 @@ func TestSignUpCheckLoginExistsError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, nil)
+	_, err := authUseCase.SignUp(context.Background(), &mockAuth, nil)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestSignUpLoginAlreadyExists(t *testing.T) {
@@ -139,9 +139,9 @@ func TestSignUpLoginAlreadyExists(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, nil)
+	_, err := authUseCase.SignUp(context.Background(), &mockAuth, nil)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestSignUpCheckUserExistsError(t *testing.T) {
@@ -160,9 +160,9 @@ func TestSignUpCheckUserExistsError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, mockUserRepo)
 
-	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
+	_, err := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestSignUpCheckUserExists(t *testing.T) {
@@ -181,9 +181,9 @@ func TestSignUpCheckUserExists(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, mockUserRepo)
 
-	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
+	_, err := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestSignUpStoreUserError(t *testing.T) {
@@ -207,9 +207,9 @@ func TestSignUpStoreUserError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, nil, nil, mockAuthRepo, mockUserRepo)
 
-	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
+	_, err := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestSignUpSignTokenError(t *testing.T) {
@@ -240,9 +240,9 @@ func TestSignUpSignTokenError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, mockTokenService, nil, nil, mockAuthRepo, mockUserRepo)
 
-	_, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
+	_, err := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestSignUpSuccess(t *testing.T) {
@@ -273,9 +273,9 @@ func TestSignUpSuccess(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, nil, nil, mockAuthRepo, mockUserRepo)
 
-	token, errToken := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
+	token, err := authUseCase.SignUp(context.Background(), &mockAuth, &mockUser)
 
-	assert.Nil(t, errToken)
+	assert.Nil(t, err)
 	assert.Equal(t, token, domain.Token("valid token"))
 }
 
@@ -290,9 +290,9 @@ func TestForgotPassCodeGetUserByLoginError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
 
-	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+	err := authUseCase.ForgotPassCode(context.Background(), mockLogin)
 
-	assert.Error(t, errCode)
+	assert.Error(t, err)
 }
 
 func TestForgotPassCodeNoUserFound(t *testing.T) {
@@ -306,9 +306,9 @@ func TestForgotPassCodeNoUserFound(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
 
-	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+	err := authUseCase.ForgotPassCode(context.Background(), mockLogin)
 
-	assert.Error(t, errCode)
+	assert.Error(t, err)
 }
 
 func TestForgotPassCodeSendMessageError(t *testing.T) {
@@ -332,9 +332,9 @@ func TestForgotPassCodeSendMessageError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
 
-	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+	err := authUseCase.ForgotPassCode(context.Background(), mockLogin)
 
-	assert.Error(t, errCode)
+	assert.Error(t, err)
 }
 
 func TestForgotPassCodeSuccess(t *testing.T) {
@@ -358,9 +358,9 @@ func TestForgotPassCodeSuccess(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, mockMessageService, nil, mockUserRepo)
 
-	errCode := authUseCase.ForgotPassCode(context.Background(), mockLogin)
+	err := authUseCase.ForgotPassCode(context.Background(), mockLogin)
 
-	assert.Nil(t, errCode)
+	assert.Nil(t, err)
 }
 
 func TestForgotPassResetValidateCodeError(t *testing.T) {
@@ -375,9 +375,9 @@ func TestForgotPassResetValidateCodeError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, nil, nil, nil)
 
-	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, "new pass")
+	_, err := authUseCase.ForgotPassReset(context.Background(), &mockCode, "new pass")
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestForgotPassResetCodeInvalid(t *testing.T) {
@@ -392,9 +392,9 @@ func TestForgotPassResetCodeInvalid(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(nil, nil, mockCodeService, nil, nil, nil)
 
-	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, "new pass")
+	_, err := authUseCase.ForgotPassReset(context.Background(), &mockCode, "new pass")
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestForgotPassResetGetAuthByLoginError(t *testing.T) {
@@ -418,9 +418,9 @@ func TestForgotPassResetGetAuthByLoginError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(mockAuthService, nil, mockCodeService, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
+	_, err := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestForgotPassResetUpdateAuthError(t *testing.T) {
@@ -452,9 +452,9 @@ func TestForgotPassResetUpdateAuthError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(mockAuthService, nil, mockCodeService, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
+	_, err := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestForgotPassResetSignTokenError(t *testing.T) {
@@ -493,9 +493,9 @@ func TestForgotPassResetSignTokenError(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, mockCodeService, nil, mockAuthRepo, nil)
 
-	_, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
+	_, err := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
 
-	assert.Error(t, errToken)
+	assert.Error(t, err)
 }
 
 func TestForgotPassResetSuccess(t *testing.T) {
@@ -534,8 +534,8 @@ func TestForgotPassResetSuccess(t *testing.T) {
 
 	authUseCase := NewAuthUseCase(mockAuthService, mockTokenService, mockCodeService, nil, mockAuthRepo, nil)
 
-	token, errToken := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
+	token, err := authUseCase.ForgotPassReset(context.Background(), &mockCode, mockNewPass)
 
-	assert.Nil(t, errToken)
+	assert.Nil(t, err)
 	assert.Equal(t, token, domain.Token("valid token"))
 }
