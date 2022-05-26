@@ -45,10 +45,10 @@ func (r *authMysqlRepository) StoreWithUser(ctx context.Context, a *domain.Auth,
 		return err
 	}
 
-	storeUserStmt, storeUserStmtErr := tx.PrepareContext(ctx, storeUserQuery)
+	storeUserStmt, err := tx.PrepareContext(ctx, storeUserQuery)
 
-	if storeUserStmtErr != nil {
-		return storeUserStmtErr
+	if err != nil {
+		return err
 	}
 
 	u.UUID = uuid.NewString()
@@ -57,10 +57,10 @@ func (r *authMysqlRepository) StoreWithUser(ctx context.Context, a *domain.Auth,
 		return err
 	}
 
-	storeAuthStmt, storeAuthStmtErr := tx.PrepareContext(ctx, storeAuthQuery)
+	storeAuthStmt, err := tx.PrepareContext(ctx, storeAuthQuery)
 
-	if storeAuthStmtErr != nil {
-		return storeAuthStmtErr
+	if err != nil {
+		return err
 	}
 
 	a.UUID = uuid.NewString()
@@ -79,22 +79,22 @@ func (r *authMysqlRepository) StoreWithUser(ctx context.Context, a *domain.Auth,
 func (r *authMysqlRepository) Update(ctx context.Context, a *domain.Auth) error {
 	query := `UPDATE auth SET login=?, password=? WHERE uuid=?;`
 
-	stmt, stmtErr := r.Conn.PrepareContext(ctx, query)
+	stmt, err := r.Conn.PrepareContext(ctx, query)
 
-	if stmtErr != nil {
-		return stmtErr
+	if err != nil {
+		return err
 	}
 
-	exec, execErr := stmt.ExecContext(ctx, a.Login, a.Password, a.UUID)
+	exec, err := stmt.ExecContext(ctx, a.Login, a.Password, a.UUID)
 
-	if execErr != nil {
-		return execErr
+	if err != nil {
+		return err
 	}
 
-	affect, affectErr := exec.RowsAffected()
+	affect, err := exec.RowsAffected()
 
-	if affectErr != nil {
-		return affectErr
+	if err != nil {
+		return err
 	}
 
 	if affect != 1 {

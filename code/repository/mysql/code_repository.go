@@ -19,22 +19,22 @@ func NewCodeMysqlRepository(conn *sql.DB) domain.CodeRepository {
 func (r *codeMysqlRepository) Store(ctx context.Context, c *domain.Code) error {
 	query := `INSERT INTO code (value, identifier) VALUES (?, ?);`
 
-	stmt, stmtErr := r.Conn.PrepareContext(ctx, query)
+	stmt, err := r.Conn.PrepareContext(ctx, query)
 
-	if stmtErr != nil {
-		return stmtErr
+	if err != nil {
+		return err
 	}
 
-	exec, execErr := stmt.ExecContext(ctx, c.Value, c.Identifier)
+	exec, err := stmt.ExecContext(ctx, c.Value, c.Identifier)
 
-	if execErr != nil {
-		return execErr
+	if err != nil {
+		return err
 	}
 
-	affect, affectErr := exec.RowsAffected()
+	affect, err := exec.RowsAffected()
 
-	if affectErr != nil {
-		return affectErr
+	if err != nil {
+		return err
 	}
 
 	if affect != 1 {
@@ -65,22 +65,22 @@ func (r *codeMysqlRepository) GetByValue(ctx context.Context, value string) (*do
 func (r *codeMysqlRepository) DeleteByValue(ctx context.Context, value string) error {
 	query := `DELETE FROM code WHERE value = ?;`
 
-	stmt, stmtErr := r.Conn.PrepareContext(ctx, query)
+	stmt, err := r.Conn.PrepareContext(ctx, query)
 
-	if stmtErr != nil {
-		return stmtErr
+	if err != nil {
+		return err
 	}
 
-	exec, execErr := stmt.ExecContext(ctx, value)
+	exec, err := stmt.ExecContext(ctx, value)
 
-	if execErr != nil {
-		return execErr
+	if err != nil {
+		return err
 	}
 
-	affect, affectErr := exec.RowsAffected()
+	affect, err := exec.RowsAffected()
 
-	if affectErr != nil {
-		return affectErr
+	if err != nil {
+		return err
 	}
 
 	if affect != 1 {
