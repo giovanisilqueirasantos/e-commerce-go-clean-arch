@@ -21,8 +21,8 @@ func NewTokenService() *tokenService {
 	return &tokenService{}
 }
 
-func (t *tokenService) Sign(ctx context.Context, info domain.TokenInfo, expirationInMynutes int64) (domain.Token, error) {
-	expirationTime := time.Now().Add(time.Duration(expirationInMynutes) * time.Minute)
+func (t *tokenService) Sign(ctx context.Context, info domain.TokenInfo, expirationInMinutes int64) (domain.Token, error) {
+	expirationTime := time.Now().Add(time.Duration(expirationInMinutes) * time.Minute)
 
 	claims := &Claims{
 		Info: info.Info,
