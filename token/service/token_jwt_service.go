@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/domain"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 var jwtKey = []byte("my_secret_key")
