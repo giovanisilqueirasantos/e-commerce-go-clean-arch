@@ -65,3 +65,15 @@ func (av *authValidator) Validate(ctx context.Context, a *domain.Auth) (domain.I
 
 	return true, ""
 }
+
+func (av *authValidator) ValidateLogin(ctx context.Context, login string) (domain.IsValid, domain.Message) {
+	if login == "" {
+		return false, "login or password can not be empty"
+	}
+
+	if _, err := mail.ParseAddress(login); err != nil {
+		return false, "login is not a valid email"
+	}
+
+	return true, ""
+}

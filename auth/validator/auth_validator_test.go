@@ -60,3 +60,17 @@ func TestValidateAuthValid(t *testing.T) {
 
 	assert.True(t, bool(isAuthValid))
 }
+
+func TestValidateLoginEmptyLogin(t *testing.T) {
+	isLoginValid, isLoginValidMessage := NewAuthValidator().ValidateLogin(context.Background(), "")
+
+	assert.False(t, bool(isLoginValid))
+	assert.NotEmpty(t, isLoginValidMessage)
+}
+
+func TestValidateLoginEmailInvalid(t *testing.T) {
+	isLoginValid, isLoginValidMessage := NewAuthValidator().ValidateLogin(context.Background(), "invalid login")
+
+	assert.False(t, bool(isLoginValid))
+	assert.NotEmpty(t, isLoginValidMessage)
+}

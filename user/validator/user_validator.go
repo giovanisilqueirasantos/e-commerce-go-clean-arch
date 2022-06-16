@@ -16,7 +16,7 @@ func NewUserValidator() *userValidator {
 	return &userValidator{}
 }
 
-func (uv *userValidator) validate(ctx context.Context, u *domain.User) (domain.IsValid, domain.Message) {
+func (uv *userValidator) Validate(ctx context.Context, u *domain.User) (domain.IsValid, domain.Message) {
 	if u.Email == "" {
 		return false, "user's email can not be empty"
 	}
