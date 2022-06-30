@@ -16,7 +16,7 @@ func NewProductHandler(e *echo.Echo, puc domain.ProductUseCase) *productHandler 
 	handler := &productHandler{
 		ProductUseCase: puc,
 	}
-	e.GET("/produtos/:uuid", handler.Get)
+	e.GET("/products/:uuid", handler.Get)
 
 	return handler
 }
