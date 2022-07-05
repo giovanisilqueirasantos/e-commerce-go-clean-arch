@@ -19,5 +19,9 @@ type Product struct {
 }
 
 type ProductUseCase interface {
-	Get(ctx context.Context, uuid string) (Product, error)
+	Get(ctx context.Context, uuid string) (*Product, error)
+}
+
+type ProductRepository interface {
+	GetByUUID(ctx context.Context, uuid string) (*Product, error)
 }
