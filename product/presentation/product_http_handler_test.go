@@ -21,7 +21,7 @@ func TestGetEmptyUUID(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	handler := NewProductHandler(echo.New(), nil)
+	handler := NewProductHandler(echo.New(), nil, nil)
 
 	handler.Get(c)
 
@@ -39,11 +39,16 @@ func TestGetErrorFind(t *testing.T) {
 	c.SetParamNames("uuid")
 	c.SetParamValues("testuuid")
 
+	c.Request().Header.Set("Authorization", "token")
+
 	mockProductUsecase := new(mocks.MockProductUsecase)
+	mockTokenService := new(mocks.MockTokenService)
 
 	mockProductUsecase.On("Get", mock.Anything, "testuuid").Return(nil, errors.New("error message"))
 
-	handler := NewProductHandler(echo.New(), mockProductUsecase)
+	mockTokenService.On("isValid", mock.Anything, "token").Return(true, nil)
+
+	handler := NewProductHandler(echo.New(), mockProductUsecase, mockTokenService)
 
 	handler.Get(c)
 
@@ -62,10 +67,13 @@ func TestGetSuccess(t *testing.T) {
 	c.SetParamValues("testuuid")
 
 	mockProductUsecase := new(mocks.MockProductUsecase)
+	mockTokenService := new(mocks.MockTokenService)
 
 	mockProductUsecase.On("Get", mock.Anything, "testuuid").Return(1, "uuid", 2, "picturepath", "name", "detail", true, "color", "black", nil)
 
-	handler := NewProductHandler(echo.New(), mockProductUsecase)
+	mockTokenService.On("isValid", mock.Anything, "token").Return(true, nil)
+
+	handler := NewProductHandler(echo.New(), mockProductUsecase, mockTokenService)
 
 	handler.Get(c)
 
