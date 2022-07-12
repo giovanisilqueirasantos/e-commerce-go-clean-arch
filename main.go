@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	_authPresentation "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/auth/presentation"
 	_authRepo "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/auth/repository"
 	_authService "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/auth/service"
@@ -12,6 +14,7 @@ import (
 	_authValidator "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/auth/validator"
 	_codeRepo "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/code/repository"
 	_codeService "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/code/service"
+	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/config"
 	_messageService "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/message/service"
 	_tokenService "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/token/service"
 	_userRepo "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/user/repository"
@@ -21,7 +24,7 @@ import (
 )
 
 func main() {
-	conf, err := getConf("config.yaml")
+	conf, err := config.GetConf("./config/config.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}

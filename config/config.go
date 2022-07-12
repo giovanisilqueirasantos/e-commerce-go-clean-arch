@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ type conf struct {
 	}
 }
 
-func getConf(filename string) (*conf, error) {
+func GetConf(filename string) (*conf, error) {
 	buf, err := ioutil.ReadFile(filename)
 
 	if err != nil {
