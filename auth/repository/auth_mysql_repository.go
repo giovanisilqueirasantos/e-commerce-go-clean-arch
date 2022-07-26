@@ -36,8 +36,8 @@ func (r *authMysqlRepository) GetByLogin(ctx context.Context, login string) (*do
 }
 
 func (r *authMysqlRepository) StoreWithUser(ctx context.Context, a *domain.Auth, u *domain.User) error {
-	storeUserQuery := `INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
-	storeAuthQuery := `INSERT INTO auth (uuid, login, password) VALUES (?, ?);`
+	storeUserQuery := `INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+	storeAuthQuery := `INSERT INTO auth (uuid, login, password) VALUES (?, ?, ?);`
 
 	tx, err := r.Conn.BeginTx(ctx, nil)
 

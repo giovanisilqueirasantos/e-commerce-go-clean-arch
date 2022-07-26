@@ -16,7 +16,7 @@ func NewUserMysqlRepository(conn *sql.DB) domain.UserRepository {
 }
 
 func (r *userMysqlRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
-	query := `SELECT id, uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode FROM user WHERE email = ?;`
+	query := `SELECT id, uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode FROM users WHERE email = ?;`
 
 	row := r.Conn.QueryRowContext(ctx, query, email)
 
