@@ -93,7 +93,7 @@ func TestStoreWithUserStoreUserError(t *testing.T) {
 		t.Fatalf("error when opening a stub database conn %s", err)
 	}
 
-	query := regexp.QuoteMeta("INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
+	query := regexp.QuoteMeta("INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
 
 	mock.ExpectBegin()
 	mock.ExpectPrepare(query)
@@ -118,8 +118,8 @@ func TestStoreWithUserStoreAuthError(t *testing.T) {
 		t.Fatalf("error when opening a stub database conn %s", err)
 	}
 
-	storeUserQuery := regexp.QuoteMeta("INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
-	storeAuthQuery := regexp.QuoteMeta("INSERT INTO auth (uuid, login, password) VALUES (?, ?);")
+	storeUserQuery := regexp.QuoteMeta("INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
+	storeAuthQuery := regexp.QuoteMeta("INSERT INTO auth (uuid, login, password) VALUES (?, ?, ?);")
 
 	mock.ExpectBegin()
 	mock.ExpectPrepare(storeUserQuery)
@@ -146,8 +146,8 @@ func TestStoreWithUser(t *testing.T) {
 		t.Fatalf("error when opening a stub database conn %s", err)
 	}
 
-	storeUserQuery := regexp.QuoteMeta("INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
-	storeAuthQuery := regexp.QuoteMeta("INSERT INTO auth (uuid, login, password) VALUES (?, ?);")
+	storeUserQuery := regexp.QuoteMeta("INSERT INTO users (uuid, email, first_name, last_name, phone_number, address_city, address_state, address_neighborhood, address_street, address_number, address_zipcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);")
+	storeAuthQuery := regexp.QuoteMeta("INSERT INTO auth (uuid, login, password) VALUES (?, ?, ?);")
 
 	mock.ExpectBegin()
 	mock.ExpectPrepare(storeUserQuery)
