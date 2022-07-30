@@ -34,3 +34,11 @@ CREATE TABLE gocleanarch.users (
 ENGINE=InnoDB
 DEFAULT CHARSET=latin1
 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE gocleanarch.code (
+	value varchar(100) NOT NULL,
+	identifier varchar(100) NOT NULL
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=latin1
+COLLATE=latin1_swedish_ci;

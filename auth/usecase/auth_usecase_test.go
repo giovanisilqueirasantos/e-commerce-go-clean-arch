@@ -320,7 +320,7 @@ func TestForgotPassCodeSendMessageError(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", mock.Anything, mockLogin).Return(1, "uuid", "user email", "user first name", "user last name", "user phone number", "user address city", "user address state", "user address neighborhood", "user address street", "user address number", "user address zipcode", nil)
 
-	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin)
+	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin, nil)
 
 	var messageConf domain.MessageConfig
 
@@ -346,7 +346,7 @@ func TestForgotPassCodeSuccess(t *testing.T) {
 
 	mockUserRepo.On("GetByEmail", mock.Anything, mockLogin).Return(1, "uuid", "user email", "user first name", "user last name", "user phone number", "user address city", "user address state", "user address neighborhood", "user address street", "user address number", "user address zipcode", nil)
 
-	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin)
+	mockCodeService.On("GenerateNewCode", mock.Anything, mockLogin, int8(6), true, false).Return("generated code", mockLogin, nil)
 
 	var messageConf domain.MessageConfig
 

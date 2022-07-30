@@ -94,7 +94,7 @@ func (cs *codeService) ValidateCode(ctx context.Context, c *domain.Code) (domain
 		return false, err
 	}
 
-	if code.Identifier == c.Identifier && code.Value == c.Value {
+	if code != nil && code.Identifier == c.Identifier && code.Value == c.Value {
 		if err := cs.codeRepo.DeleteByValue(ctx, c.Value); err != nil {
 			return false, err
 		} else {
