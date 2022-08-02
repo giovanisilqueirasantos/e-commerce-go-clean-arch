@@ -49,7 +49,7 @@ docker run --detach --name=gocleanarch-db --env="MYSQL_ROOT_PASSWORD=rootpass" -
 ```json
 {
 	"login": "user@test.com",
-  "code": "n90VAn",
+	"code": "n90VAn",
 	"newPassword": "Password1234$"
 }
 ```
