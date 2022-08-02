@@ -42,3 +42,17 @@ CREATE TABLE gocleanarch.code (
 ENGINE=InnoDB
 DEFAULT CHARSET=latin1
 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE gocleanarch.product (
+	id INT auto_increment NOT NULL,
+	uuid varchar(128) NOT NULL,
+	name varchar(150) NOT NULL,
+	detail varchar(250) NOT NULL,
+	CONSTRAINT `PRIMARY` PRIMARY KEY (id),
+	CONSTRAINT product_id_UN UNIQUE KEY (id),
+	CONSTRAINT product_uuid_UN UNIQUE KEY (uuid),
+	CONSTRAINT product_name_UN UNIQUE KEY (name)
+)
+ENGINE=InnoDB
+DEFAULT CHARSET=latin1
+COLLATE=latin1_swedish_ci;

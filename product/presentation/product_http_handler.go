@@ -53,5 +53,9 @@ func (ph *productHandler) Get(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "failed to get the product")
 	}
 
+	if product == nil {
+		return c.JSON(http.StatusNotFound, "product not found")
+	}
+
 	return c.JSON(http.StatusOK, product)
 }

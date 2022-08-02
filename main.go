@@ -16,6 +16,9 @@ import (
 	_codeService "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/code/service"
 	"github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/config"
 	_messageService "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/message/service"
+	_productPresentation "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/product/presentation"
+	_productRepo "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/product/repository"
+	_productUsecase "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/product/usecase"
 	_tokenService "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/token/service"
 	_userRepo "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/user/repository"
 	_userValidator "github.com/giovanisilqueirasantos/e-commerce-go-clean-arch/user/validator"
@@ -55,6 +58,7 @@ func main() {
 	authRepo := _authRepo.NewAuthMysqlRepository(dbConn)
 	codeRepo := _codeRepo.NewCodeMysqlRepository(dbConn)
 	userRepo := _userRepo.NewUserMysqlRepository(dbConn)
+	productRepo := _productRepo.NewProductMysqlRepository(dbConn)
 
 	authService := _authService.NewAuthService()
 	codeService := _codeService.NewCodeService(codeRepo)
@@ -65,8 +69,10 @@ func main() {
 	userValidator := _userValidator.NewUserValidator()
 
 	authUsecase := _authUsecase.NewAuthUseCase(authService, tokenService, codeService, messageService, authRepo, userRepo)
+	productUsecase := _productUsecase.NewProductUseCase(productRepo)
 
 	_authPresentation.NewAuthHandler(e, authUsecase, authValidator, userValidator)
+	_productPresentation.NewProductHandler(e, productUsecase, tokenService)
 
 	log.Fatal(e.Start(conf.Server.Address))
 }
